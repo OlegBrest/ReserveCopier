@@ -1,0 +1,33 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ReserveCopier.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="InputPaths" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="OutputPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">c:\tmp</Value>
+    </Setting>
+    <Setting Name="CopyModeValue" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Разностное относительно первой копии</Value>
+    </Setting>
+    <Setting Name="FullCopyPeriodic" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Еженедельно</Value>
+    </Setting>
+    <Setting Name="DayOfWeekCheck" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="periodicHours" Type="System.Decimal" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="LastDiffPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">""</Value>
+    </Setting>
+    <Setting Name="LastDiffTime" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)">2020-01-01</Value>
+    </Setting>
+    <Setting Name="LastFullTime" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)">2020-01-01</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
