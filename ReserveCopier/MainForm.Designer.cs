@@ -93,6 +93,25 @@
             this.autostart_chkbx.UseVisualStyleBackColor = true;
             this.autostart_chkbx.CheckedChanged += new System.EventHandler(this.autostart_chkbx_CheckedChanged);
             // 
+            this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.progressBar.Location = new System.Drawing.Point(230, 3);
+            this.progressBar.Name = "progressBar";
+            this.progressBar.Size = new System.Drawing.Size(766, 25);
+            this.progressBar.TabIndex = 7;
+            this.progressBar.Visible = false;
+            // 
+            // SaveFullFileBttn
+            // 
+            this.SaveFullFileBttn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.SaveFullFileBttn.Location = new System.Drawing.Point(655, 417);
+            this.SaveFullFileBttn.Name = "SaveFullFileBttn";
+            this.SaveFullFileBttn.Size = new System.Drawing.Size(143, 71);
+            this.SaveFullFileBttn.TabIndex = 6;
+            this.SaveFullFileBttn.Text = "Сохранить полный файл";
+            this.SaveFullFileBttn.UseVisualStyleBackColor = true;
+            this.SaveFullFileBttn.Click += new System.EventHandler(this.SaveFullFileBttn_Click);
+            // 
             // dataGridViewprogress
             // 
             this.dataGridViewprogress.AllowUserToAddRows = false;
@@ -350,7 +369,9 @@
         private System.Windows.Forms.Label SizeLabel;
         private System.Windows.Forms.Label labelSize;
         private System.Windows.Forms.DataGridView dataGridViewprogress;
+        private System.Windows.Forms.Button SaveFullFileBttn;
         private System.Windows.Forms.ProgressBar progressBar;
+        private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label SpeedLabel;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Panel panel1;

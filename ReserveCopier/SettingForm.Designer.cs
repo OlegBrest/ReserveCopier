@@ -29,7 +29,10 @@
         private void InitializeComponent()
         {
             this.MainSettingPanel = new System.Windows.Forms.Panel();
+            this.hours_numericUpDown = new System.Windows.Forms.NumericUpDown();
             this.Days_checkedListBox = new System.Windows.Forms.CheckedListBox();
+            this.fullcopy_Combobox = new System.Windows.Forms.ComboBox();
+            this.Mode_Combobox = new System.Windows.Forms.ComboBox();
             this.cancel_bttn = new System.Windows.Forms.Button();
             this.ok_bttn = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
@@ -39,6 +42,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.OutPathBttn = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
+            this.outpathTxtbx = new System.Windows.Forms.TextBox();
             this.DeletePathBttn = new System.Windows.Forms.Button();
             this.EditPathBttn = new System.Windows.Forms.Button();
             this.InputPathLstBX = new System.Windows.Forms.CheckedListBox();
@@ -87,6 +91,28 @@
             this.MainSettingPanel.Size = new System.Drawing.Size(832, 567);
             this.MainSettingPanel.TabIndex = 0;
             // 
+            // hours_numericUpDown
+            // 
+            this.hours_numericUpDown.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::ReserveCopier.Properties.Settings.Default, "periodicHours", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.hours_numericUpDown.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.hours_numericUpDown.Location = new System.Drawing.Point(601, 305);
+            this.hours_numericUpDown.Maximum = new decimal(new int[] {
+            24,
+            0,
+            0,
+            0});
+            this.hours_numericUpDown.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.hours_numericUpDown.Name = "hours_numericUpDown";
+            this.hours_numericUpDown.Size = new System.Drawing.Size(53, 26);
+            this.hours_numericUpDown.TabIndex = 11;
+            this.hours_numericUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.hours_numericUpDown.Value = global::ReserveCopier.Properties.Settings.Default.periodicHours;
+            this.hours_numericUpDown.ValueChanged += new System.EventHandler(this.hours_numericUpDown_ValueChanged);
+            // 
             // Days_checkedListBox
             // 
             this.Days_checkedListBox.CheckOnClick = true;
@@ -104,6 +130,39 @@
             this.Days_checkedListBox.Name = "Days_checkedListBox";
             this.Days_checkedListBox.Size = new System.Drawing.Size(184, 151);
             this.Days_checkedListBox.TabIndex = 10;
+            // 
+            // fullcopy_Combobox
+            // 
+            this.fullcopy_Combobox.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::ReserveCopier.Properties.Settings.Default, "FullCopyPeriodic", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.fullcopy_Combobox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.fullcopy_Combobox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.fullcopy_Combobox.FormattingEnabled = true;
+            this.fullcopy_Combobox.Items.AddRange(new object[] {
+            "Еженедельно",
+            "Ежемесячно",
+            "Ежегодно"});
+            this.fullcopy_Combobox.Location = new System.Drawing.Point(406, 205);
+            this.fullcopy_Combobox.Name = "fullcopy_Combobox";
+            this.fullcopy_Combobox.Size = new System.Drawing.Size(414, 28);
+            this.fullcopy_Combobox.TabIndex = 9;
+            this.fullcopy_Combobox.Text = global::ReserveCopier.Properties.Settings.Default.FullCopyPeriodic;
+            // 
+            // Mode_Combobox
+            // 
+            this.Mode_Combobox.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::ReserveCopier.Properties.Settings.Default, "CopyModeValue", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.Mode_Combobox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Mode_Combobox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.Mode_Combobox.FormattingEnabled = true;
+            this.Mode_Combobox.Items.AddRange(new object[] {
+            "Полное",
+            "Разностное относительно первой копии",
+            "Разностное относительно последней копии"});
+            this.Mode_Combobox.Location = new System.Drawing.Point(406, 128);
+            this.Mode_Combobox.Name = "Mode_Combobox";
+            this.Mode_Combobox.Size = new System.Drawing.Size(414, 28);
+            this.Mode_Combobox.TabIndex = 9;
+            this.Mode_Combobox.Text = global::ReserveCopier.Properties.Settings.Default.CopyModeValue;
+            this.Mode_Combobox.TextChanged += new System.EventHandler(this.Mode_Combobox_TextChanged);
             // 
             // cancel_bttn
             // 
@@ -195,6 +254,16 @@
             this.label1.Size = new System.Drawing.Size(223, 25);
             this.label1.TabIndex = 5;
             this.label1.Text = "Путь для сохранения";
+            // 
+            // outpathTxtbx
+            // 
+            this.outpathTxtbx.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::ReserveCopier.Properties.Settings.Default, "OutputPath", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.outpathTxtbx.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.outpathTxtbx.Location = new System.Drawing.Point(406, 40);
+            this.outpathTxtbx.Name = "outpathTxtbx";
+            this.outpathTxtbx.Size = new System.Drawing.Size(414, 26);
+            this.outpathTxtbx.TabIndex = 4;
+            this.outpathTxtbx.Text = global::ReserveCopier.Properties.Settings.Default.OutputPath;
             // 
             // DeletePathBttn
             // 

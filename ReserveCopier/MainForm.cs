@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ReserveCopier
@@ -177,18 +178,18 @@ namespace ReserveCopier
             if ((!trdfilecopy.IsAlive) && (!trdfilecalc.IsAlive) && (step == 0) && (currstep == 0))
             {
                 step = 1;
-                CheckPaths();
-                TotalDirs = 0;
-                TotalFiles = 0;
-                TotalSize = 0;
-                //dtfiles.Rows.Clear();
-                mainFiledata.Clear();
-                currFileData.Clear();
-                diffFiledata.Clear();
-                string[] Paths = Properties.Settings.Default.InputPaths.Split('\n');
+            CheckPaths();
+            TotalDirs = 0;
+            TotalFiles = 0;
+            TotalSize = 0;
+            //dtfiles.Rows.Clear();
+            mainFiledata.Clear();
+            currFileData.Clear();
+            diffFiledata.Clear();
+            string[] Paths = Properties.Settings.Default.InputPaths.Split('\n');
 
-                trdfilecalc = new Thread(CalcTotalFileDirsCount);
-                trdfilecalc.Start(Paths);
+            trdfilecalc = new Thread(CalcTotalFileDirsCount);
+            trdfilecalc.Start(Paths);
                 currstep = 1;
                 step = 0;
                 //calctrdstarted = true;
@@ -287,6 +288,7 @@ namespace ReserveCopier
             //if (!trdfilecalc.IsAlive && !trdfilecopy.IsAlive && (manualStart || autostart) && !copying)
             if (!trdfilecalc.IsAlive && !trdfilecopy.IsAlive && (step != 0) && (currstep!=0))
             {
+                fullFileWrite = false;
                 string Mode = Properties.Settings.Default.CopyModeValue;
                 int modeint = 0;
                 switch (Mode)
@@ -383,7 +385,7 @@ namespace ReserveCopier
                     {
                         firstRow += (lastvisrow - lastdisprow);
                         if (firstRow >= 0) dataGridViewprogress.FirstDisplayedScrollingRowIndex = firstRow;
-                    }
+            }
                 }
             }
 
@@ -490,15 +492,22 @@ namespace ReserveCopier
                     dtLog.Rows.Add(DateTime.Now, "518.Записываю файл отличий.");
                     InterfaceUpdateTimer_Tick();
                     File.WriteAllLines(DiffFileName, difflines);
-                    if (mode == 2)
-                    {
+                    Properties.Settings.Default.LastDiffPath = DiffFilePath;
+                    Properties.Settings.Default.LastDiffTime = DateTime.Now;
+                    Properties.Settings.Default.Save();
+                    Properties.Settings.Default.Reload();
+                    #endregion
+                }
+                // если нет полного файла то создаём , если есть то создаём новый разностный DIFFILE после заменяя MAINFULL
+                if (mode == 2)
+                {
                         // и перезапишем основной файл
                         // если нет полного файла то создаём , если есть то создаём новый разностный DIFFILE после заменяя MAINFULL
-                        File.Delete(MainFileName);
-                        currFileData.ToStringArray(ref currlines);
+                    File.Delete(MainFileName);
+                    currFileData.ToStringArray(ref currlines);
                         dtLog.Rows.Add(DateTime.Now, "514.Перезаписываю основной файл новыми данными." + currFileData.Count + " записей.");
-                        InterfaceUpdateTimer_Tick();
-                        File.WriteAllLines(MainFileName, currlines);
+                    InterfaceUpdateTimer_Tick();
+                    File.WriteAllLines(MainFileName, currlines);
                     }
                     Properties.Settings.Default.LastDiffPath = DiffFilePath;
                     Properties.Settings.Default.LastDiffTime = DateTime.Now;
@@ -518,6 +527,45 @@ namespace ReserveCopier
                 Properties.Settings.Default.Reload();
             }
             step = 2;
+        }
+
+        private void SaveFullFileBttn_Click(object sender, EventArgs e)
+        {
+            string Mode = Properties.Settings.Default.CopyModeValue;
+            int modeint = 0;
+            switch (Mode)
+            {
+                case "Полное":
+                    modeint = 0;
+                    break;
+                case "Разностное относительно первой копии":
+                    modeint = 1;
+                    break;
+                case "Разностное относительно последней копии":
+                    modeint = 2;
+                    break;
+            }
+            WriteFileDiff(modeint);
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            string Mode = Properties.Settings.Default.CopyModeValue;
+            int modeint = 0;
+            switch (Mode)
+            {
+                case "Полное":
+                    modeint = 0;
+                    break;
+                case "Разностное относительно первой копии":
+                    modeint = 1;
+                    break;
+                case "Разностное относительно последней копии":
+                    modeint = 2;
+                    break;
+            }
+            trdfilecopy = new Thread(CopyFiles);
+            trdfilecopy.Start(modeint);
         }
 
         private void CopyFiles(object mode)
@@ -630,6 +678,7 @@ namespace ReserveCopier
                     TotalFiles = mainFiledata.Count;
                     foreach (FileData.FileStruct fs in mainFiledata.Files)
                     {
+
                         if (File.Exists(fs.FileFullName))
                         {
                             FileInfo fi = new FileInfo(fs.FileFullName);
@@ -680,6 +729,7 @@ namespace ReserveCopier
                 {
                     diffFiledata.Clear();
                     diffFiledata.InsertFromStrArr(File.ReadAllLines(DiffFileName));
+
                     TotalSize = diffFiledata.GetTotalSize();
                     TotalFiles = diffFiledata.Count;
                     long currsize = 0;
@@ -763,7 +813,7 @@ namespace ReserveCopier
                                 InterfaceUpdateTimer_Tick();
                             }
                         }
-                        TimeSpan ts = (DateTime.Now - starttime);
+                            TimeSpan ts = (DateTime.Now - starttime);
                         if (ts.TotalSeconds > 2)
                         {
                             speedMbs = (((currsize - lastsize) / (1024 * 1024)) / ts.TotalMilliseconds) * 1000;
@@ -787,7 +837,7 @@ namespace ReserveCopier
             //copying = false;
             step = 0;
             currstep = 0;
-        }
+            }
 
         private void autostart_chkbx_CheckedChanged(object sender, EventArgs e)
         {
