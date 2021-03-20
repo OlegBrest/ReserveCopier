@@ -4,7 +4,6 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ReserveCopier
@@ -14,7 +13,7 @@ namespace ReserveCopier
         int TotalDirs = 0;
         int TotalFiles = 0;
         double TotalSize = 0;
-        int progress_rows = 0;
+        int log_rows = 0;
         DataTable dtLog = new DataTable();
         BindingSource bs = new BindingSource();
         //DataTable dtfiles = new DataTable();
@@ -27,7 +26,7 @@ namespace ReserveCopier
         int currstep = 0; // текущий шаг (в начале функции)
         Thread trdfilecalc; // поток подсчёта файлов
         Thread trdfilecopy; // поток копирования файлов
-
+        string current_path = "";
         double speedMbs = 0; // Скорость метров в сек
         double speedFils = 0; // Скорость файлов в сек
 
@@ -44,14 +43,20 @@ namespace ReserveCopier
         System.Timers.Timer InterfaceUpdateTimer = new System.Timers.Timer();
         System.Timers.Timer AutoCheckTimer = new System.Timers.Timer();
 
+
+        DataTable testDT = new DataTable();
+        BindingSource testbs = new BindingSource();
+
         public MainReservCopyer()
         {
             InitializeComponent();
             SetDoubleBuffered(dataGridViewprogress);
             dtLog.Columns.Add("Время", typeof(DateTime));
             dtLog.Columns.Add("Cообщение", typeof(string));
+            dtLog.BeginLoadData();
             bs.DataSource = dtLog;
             dataGridViewprogress.DataSource = bs;
+            dataGridViewprogress.Columns[0].DefaultCellStyle.Format = "dd/MM/yyyy hh:mm:ss.fff";
             InterfaceUpdateTimer.Elapsed += InterfaceUpdateTimer_Elapsed;
             InterfaceUpdateTimer.AutoReset = true;
             InterfaceUpdateTimer.Interval = 100;
@@ -62,12 +67,17 @@ namespace ReserveCopier
             AutoCheckTimer.AutoReset = true;
             AutoCheckTimer.Interval = 5000;
             AutoCheckTimer.Enabled = Properties.Settings.Default.AutoStartCopy;
-            AutoCheckTimer.Start();
+            if (autostart_chkbx.Checked) AutoCheckTimer.Start();
+            else AutoCheckTimer.Stop();
 
             trdfilecalc = new Thread(CalcTotalFileDirsCount);
             trdfilecopy = new Thread(CopyFiles);
             dtLog.Rows.Add(DateTime.Now, "52.Программа прошла инициализацию.");
             CheckPaths();
+
+            testDT.Columns.Add("test");
+            testbs.DataSource = testDT;
+            test_dgv.DataSource = testbs;
         }
 
         #region автозапуск
@@ -100,7 +110,7 @@ namespace ReserveCopier
             }
             // проверим потоки
             //if ((!trdfilecalc.IsAlive) && (!trdfilecopy.IsAlive) && !autostart && !calctrdstarted && !copying)
-            if ((!trdfilecalc.IsAlive) && (!trdfilecopy.IsAlive) && (step == 0) && (currstep==0))
+            if ((!trdfilecalc.IsAlive) && (!trdfilecopy.IsAlive) && (step == 0) && (currstep == 0))
             {
                 try
                 {
@@ -130,7 +140,7 @@ namespace ReserveCopier
                 {
                     dtLog.Rows.Add(DateTime.Now, "169.Ошибка : " + ex.Message);
                     //autostart = false;
-                    InterfaceUpdateTimer_Tick();
+                    //InterfaceUpdateTimer_Tick();
                 }
             }
         }
@@ -178,24 +188,24 @@ namespace ReserveCopier
             if ((!trdfilecopy.IsAlive) && (!trdfilecalc.IsAlive) && (step == 0) && (currstep == 0))
             {
                 step = 1;
-            CheckPaths();
-            TotalDirs = 0;
-            TotalFiles = 0;
-            TotalSize = 0;
-            //dtfiles.Rows.Clear();
-            mainFiledata.Clear();
-            currFileData.Clear();
-            diffFiledata.Clear();
-            string[] Paths = Properties.Settings.Default.InputPaths.Split('\n');
+                CheckPaths();
+                TotalDirs = 0;
+                TotalFiles = 0;
+                TotalSize = 0;
+                //dtfiles.Rows.Clear();
+                mainFiledata.Clear();
+                currFileData.Clear();
+                diffFiledata.Clear();
+                string[] Paths = Properties.Settings.Default.InputPaths.Split('\n');
 
-            trdfilecalc = new Thread(CalcTotalFileDirsCount);
-            trdfilecalc.Start(Paths);
+                trdfilecalc = new Thread(CalcTotalFileDirsCount);
+                trdfilecalc.Start(Paths);
                 currstep = 1;
                 step = 0;
                 //calctrdstarted = true;
             }
             //manualStart = true;
-            InterfaceUpdateTimer_Tick();
+            //InterfaceUpdateTimer_Tick();
         }
 
         private void CalcTotalFileDirsCount(object _Paths)
@@ -212,6 +222,7 @@ namespace ReserveCopier
         {
             if (File.Exists(path))
             {
+                current_path = path;
                 TotalFiles++;
                 FileInfo fi = new FileInfo(path);
                 long length = fi.Length;
@@ -237,14 +248,14 @@ namespace ReserveCopier
                         {
                             //progressList.Add(DateTime.Now.ToLongTimeString() + " . Ошибка : " + ex.Message);
                             dtLog.Rows.Add(DateTime.Now, "134.Ошибка : " + ex.Message);
-                            InterfaceUpdateTimer_Tick();
+                            //InterfaceUpdateTimer_Tick();
                         }
                     }
                     catch (Exception ex)
                     {
                         //progressList.Add(DateTime.Now.ToLongTimeString() + " . Ошибка : " + ex.Message);
                         dtLog.Rows.Add(DateTime.Now, "141.Ошибка : " + ex.Message);
-                        InterfaceUpdateTimer_Tick();
+                        //InterfaceUpdateTimer_Tick();
                     }
                 }
             }
@@ -272,6 +283,11 @@ namespace ReserveCopier
                 SpeedLabel.BeginInvoke(new Action(updateSpeedLabel));
             }
             else updateSpeedLabel();
+            if (Path_txtBx.InvokeRequired)
+            {
+                Path_txtBx.BeginInvoke(new Action(updatePathTxtBx));
+            }
+            else updatePathTxtBx();
             if (dataGridViewprogress.InvokeRequired)
             {
                 dataGridViewprogress.BeginInvoke(new Action(updateProgressView));
@@ -284,11 +300,10 @@ namespace ReserveCopier
             else updateProgressBar();
 
             // запишем файл
-            if ((!trdfilecalc.IsAlive) && (currstep==1) && (step == 0)) step = 1;
+            if ((!trdfilecalc.IsAlive) && (currstep == 1) && (step == 0)) step = 1;
             //if (!trdfilecalc.IsAlive && !trdfilecopy.IsAlive && (manualStart || autostart) && !copying)
-            if (!trdfilecalc.IsAlive && !trdfilecopy.IsAlive && (step != 0) && (currstep!=0))
+            if (!trdfilecalc.IsAlive && !trdfilecopy.IsAlive && (step != 0) && (currstep != 0))
             {
-                fullFileWrite = false;
                 string Mode = Properties.Settings.Default.CopyModeValue;
                 int modeint = 0;
                 switch (Mode)
@@ -308,8 +323,8 @@ namespace ReserveCopier
                      manualStart = false;
                      autostart = false;
                      calctrdstarted = false;*/
-                if ((step == 1) && (currstep==1)) WriteIndexFiles(modeint);
-                if ((step == 2) && (currstep==2))
+                if ((step == 1) && (currstep == 1)) WriteIndexFiles(modeint);
+                if ((step == 2) && (currstep == 2))
                 {
                     currstep = 3;
                     trdfilecopy = new Thread(CopyFiles);
@@ -361,21 +376,38 @@ namespace ReserveCopier
             SpeedLabel.Text = String.Format("{0:N2} Мб/с, {1:N2} Ф/с", speedMbs, speedFils);
             SpeedLabel.Update();
         }
+        private void updatePathTxtBx()
+        {
+            Path_txtBx.Text = current_path;
+            Path_txtBx.Update();
+        }
         private void updateProgressView()
         {
-            if (progress_rows != dtLog.Rows.Count)
+            if (log_rows != dtLog.Rows.Count)
             {
-                if (dtLog.Rows.Count > 200) dtLog.Rows.RemoveAt(0);
+                if (dtLog.Rows.Count > 200)
+                {
+                    int rws2del = (dtLog.Rows.Count - 200);
+                    for (int i = 0; i < rws2del;i++)
+                    {
+                        dtLog.Rows[0].Delete();
+                    }
+                }
+                dtLog.EndLoadData();
                 int firstRow = dataGridViewprogress.FirstDisplayedScrollingRowIndex;
                 try
                 {
+                    bs.RaiseListChangedEvents = true;
                     bs.ResetBindings(false);
+                    bs.RaiseListChangedEvents = false;
                 }
                 catch (Exception ex)
                 {
+                    if (!ex.Message.Equals("Заданный аргумент находится вне диапазона допустимых значений.\r\nИмя параметра: rowIndex"))
                     MessageBox.Show("226.MainForm.", ex.Message);
+                    dtLog.Rows.Add(DateTime.Now, "408.Ошибка." + ex.Message);
                 }
-                progress_rows = dtLog.Rows.Count;
+                log_rows = dtLog.Rows.Count;
                 if (firstRow >= 0) dataGridViewprogress.FirstDisplayedScrollingRowIndex = firstRow;
                 if (Properties.Settings.Default.AutoScroolLog)
                 {
@@ -385,8 +417,10 @@ namespace ReserveCopier
                     {
                         firstRow += (lastvisrow - lastdisprow);
                         if (firstRow >= 0) dataGridViewprogress.FirstDisplayedScrollingRowIndex = firstRow;
-            }
+                    }
                 }
+                dataGridViewprogress.Update();
+                dtLog.BeginLoadData();
             }
 
         }
@@ -415,7 +449,7 @@ namespace ReserveCopier
         private void CheckPaths()
         {
             dtLog.Rows.Add(DateTime.Now, "229.Перепроверю пути сохранения файлов");
-            InterfaceUpdateTimer_Tick();
+            //InterfaceUpdateTimer_Tick();
             DateTime dt1 = DateTime.Now;
             string CreateDiffDay = dt1.Year + "\\" + dt1.Month + "\\" + dt1.Day + "\\" + dt1.Hour + "." + dt1.Minute;
             GregorianCalendar cal = new GregorianCalendar();
@@ -447,7 +481,7 @@ namespace ReserveCopier
             DiffFileName = DiffFilePath + "DIFFILE.txt";
             dtLog.Rows.Add(DateTime.Now, MainFileName);
             dtLog.Rows.Add(DateTime.Now, DiffFileName);
-            InterfaceUpdateTimer_Tick();
+            //InterfaceUpdateTimer_Tick();
 
         }
 
@@ -462,7 +496,7 @@ namespace ReserveCopier
                 if (mode == 0)
                 {
                     dtLog.Rows.Add(DateTime.Now, "337.Записываю основной файл поверх старого." + currlines.Length + " записей.");
-                    InterfaceUpdateTimer_Tick();
+                    //InterfaceUpdateTimer_Tick();
                     File.Delete(MainFileName);
                     File.WriteAllLines(MainFileName, currlines);
                 }
@@ -471,7 +505,7 @@ namespace ReserveCopier
                 {
                     #region заливаем предыдущий ДТ для сравнения
                     dtLog.Rows.Add(DateTime.Now, "499.Читаю основной файл для последующего сравнения.");
-                    InterfaceUpdateTimer_Tick();
+                    //InterfaceUpdateTimer_Tick();
                     mainFiledata.Clear();
                     string[] mainlines = File.ReadAllLines(MainFileName);
                     mainFiledata.InsertFromStrArr(mainlines, "");
@@ -490,24 +524,17 @@ namespace ReserveCopier
                     string[] difflines = new string[0];
                     diffFiledata.ToStringArray(ref difflines);
                     dtLog.Rows.Add(DateTime.Now, "518.Записываю файл отличий.");
-                    InterfaceUpdateTimer_Tick();
+                    //InterfaceUpdateTimer_Tick();
                     File.WriteAllLines(DiffFileName, difflines);
-                    Properties.Settings.Default.LastDiffPath = DiffFilePath;
-                    Properties.Settings.Default.LastDiffTime = DateTime.Now;
-                    Properties.Settings.Default.Save();
-                    Properties.Settings.Default.Reload();
-                    #endregion
-                }
-                // если нет полного файла то создаём , если есть то создаём новый разностный DIFFILE после заменяя MAINFULL
-                if (mode == 2)
-                {
+                    if (mode == 2)
+                    {
                         // и перезапишем основной файл
                         // если нет полного файла то создаём , если есть то создаём новый разностный DIFFILE после заменяя MAINFULL
-                    File.Delete(MainFileName);
-                    currFileData.ToStringArray(ref currlines);
+                        File.Delete(MainFileName);
+                        currFileData.ToStringArray(ref currlines);
                         dtLog.Rows.Add(DateTime.Now, "514.Перезаписываю основной файл новыми данными." + currFileData.Count + " записей.");
-                    InterfaceUpdateTimer_Tick();
-                    File.WriteAllLines(MainFileName, currlines);
+                        // InterfaceUpdateTimer_Tick();
+                        File.WriteAllLines(MainFileName, currlines);
                     }
                     Properties.Settings.Default.LastDiffPath = DiffFilePath;
                     Properties.Settings.Default.LastDiffTime = DateTime.Now;
@@ -520,52 +547,13 @@ namespace ReserveCopier
             {
                 currFileData.ToStringArray(ref currlines);
                 dtLog.Rows.Add(DateTime.Now, "499.Записываю основной файл.");
-                InterfaceUpdateTimer_Tick();
+                //InterfaceUpdateTimer_Tick();
                 File.WriteAllLines(MainFileName, currlines);
                 Properties.Settings.Default.LastFullTime = DateTime.MinValue;
                 Properties.Settings.Default.Save();
                 Properties.Settings.Default.Reload();
             }
             step = 2;
-        }
-
-        private void SaveFullFileBttn_Click(object sender, EventArgs e)
-        {
-            string Mode = Properties.Settings.Default.CopyModeValue;
-            int modeint = 0;
-            switch (Mode)
-            {
-                case "Полное":
-                    modeint = 0;
-                    break;
-                case "Разностное относительно первой копии":
-                    modeint = 1;
-                    break;
-                case "Разностное относительно последней копии":
-                    modeint = 2;
-                    break;
-            }
-            WriteFileDiff(modeint);
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            string Mode = Properties.Settings.Default.CopyModeValue;
-            int modeint = 0;
-            switch (Mode)
-            {
-                case "Полное":
-                    modeint = 0;
-                    break;
-                case "Разностное относительно первой копии":
-                    modeint = 1;
-                    break;
-                case "Разностное относительно последней копии":
-                    modeint = 2;
-                    break;
-            }
-            trdfilecopy = new Thread(CopyFiles);
-            trdfilecopy.Start(modeint);
         }
 
         private void CopyFiles(object mode)
@@ -602,11 +590,12 @@ namespace ReserveCopier
                             try
                             {
                                 File.Copy(fs.FileFullName, savefilename, true);
+                                current_path = fs.FileFullName;
                             }
                             catch (Exception ex)
                             {
                                 dtLog.Rows.Add(DateTime.Now, "356.Ошибка : " + ex.Message);
-                                InterfaceUpdateTimer_Tick();
+                                //InterfaceUpdateTimer_Tick();
                             }
                             TotalFiles--;
                             currsize += fi.Length;
@@ -614,7 +603,7 @@ namespace ReserveCopier
                             ProgressValue = (int)(((currsize / speedSize) * 100) + 0.5);
                             TotalSize = speedSize - currsize;
                             if (TotalSize < 0) TotalSize = 0;
-                            InterfaceUpdateTimer_Tick();
+                            //InterfaceUpdateTimer_Tick();
                         }
                         TimeSpan ts = (DateTime.Now - starttime);
                         if (ts.TotalSeconds > 2)
@@ -624,7 +613,7 @@ namespace ReserveCopier
                             starttime = DateTime.Now;
                             lastsize = currsize;
                             lastFiles = TotalFiles;
-                            InterfaceUpdateTimer_Tick();
+                            //InterfaceUpdateTimer_Tick();
                         }
                     }
                     Properties.Settings.Default.LastFullTime = DateTime.Now;
@@ -634,7 +623,7 @@ namespace ReserveCopier
                 else
                 {
                     dtLog.Rows.Add(DateTime.Now, "381.Ошибка : Не найден основной файл-список.");
-                    InterfaceUpdateTimer_Tick();
+                    //InterfaceUpdateTimer_Tick();
                 }
             }
             // делаем разностную 
@@ -673,12 +662,11 @@ namespace ReserveCopier
                     int lastFiles = TotalFiles;
                     speedMbs = 0;
                     speedFils = 0;
-                    dtLog.Rows.Add(DateTime.Now, "555. Копирую основные файлы.");
-                    InterfaceUpdateTimer_Tick();
+                    dtLog.Rows.Add(DateTime.Now, "555.Копирую основные файлы.");
+                    //InterfaceUpdateTimer_Tick();
                     TotalFiles = mainFiledata.Count;
                     foreach (FileData.FileStruct fs in mainFiledata.Files)
                     {
-
                         if (File.Exists(fs.FileFullName))
                         {
                             FileInfo fi = new FileInfo(fs.FileFullName);
@@ -689,11 +677,12 @@ namespace ReserveCopier
                             try
                             {
                                 File.Copy(fs.FileFullName, savefilename, true);
+                                current_path = fs.FileFullName;
                             }
                             catch (Exception ex)
                             {
                                 dtLog.Rows.Add(DateTime.Now, "356.Ошибка : " + ex.Message);
-                                InterfaceUpdateTimer_Tick();
+                                //InterfaceUpdateTimer_Tick();
                             }
                             TotalFiles--;
                             currsize += fi.Length;
@@ -701,7 +690,7 @@ namespace ReserveCopier
                             ProgressValue = (int)(((currsize / speedSize) * 100) + 0.5);
                             TotalSize = speedSize - currsize;
                             if (TotalSize < 0) TotalSize = 0;
-                            InterfaceUpdateTimer_Tick();
+                            //InterfaceUpdateTimer_Tick();
                         }
                         TimeSpan ts = (DateTime.Now - starttime);
                         if (ts.TotalSeconds > 2)
@@ -711,11 +700,11 @@ namespace ReserveCopier
                             starttime = DateTime.Now;
                             lastsize = currsize;
                             lastFiles = TotalFiles;
-                            InterfaceUpdateTimer_Tick();
+                            //InterfaceUpdateTimer_Tick();
                         }
                     }
-                    dtLog.Rows.Add(DateTime.Now, "595. Скопированы основные файлы." + mainFiledata.Count + " файлов");
-                    InterfaceUpdateTimer_Tick();
+                    dtLog.Rows.Add(DateTime.Now, "595.Скопированы основные файлы." + mainFiledata.Count + " файлов");
+                    //InterfaceUpdateTimer_Tick();
                     Properties.Settings.Default.LastFullTime = DateTime.Now;
                     Properties.Settings.Default.Save();
                     Properties.Settings.Default.Reload();
@@ -723,13 +712,12 @@ namespace ReserveCopier
                 else if (!File.Exists(MainFileName))
                 {
                     dtLog.Rows.Add(DateTime.Now, "596.Ошибка : Не найден основной файл-список.");
-                    InterfaceUpdateTimer_Tick();
+                    //InterfaceUpdateTimer_Tick();
                 }
                 if (File.Exists(DiffFileName))
                 {
                     diffFiledata.Clear();
                     diffFiledata.InsertFromStrArr(File.ReadAllLines(DiffFileName));
-
                     TotalSize = diffFiledata.GetTotalSize();
                     TotalFiles = diffFiledata.Count;
                     long currsize = 0;
@@ -740,8 +728,8 @@ namespace ReserveCopier
                     int lastFiles = TotalFiles;
                     speedMbs = 0;
                     speedFils = 0;
-                    dtLog.Rows.Add(DateTime.Now, "621. Копирую файлы отличия.");
-                    InterfaceUpdateTimer_Tick();
+                    dtLog.Rows.Add(DateTime.Now, "621.Копирую файлы отличия.");
+                    //InterfaceUpdateTimer_Tick();
                     foreach (FileData.FileStruct fs in diffFiledata.Files)
                     {
                         if (File.Exists(fs.FileFullName) && !fs.FileState.Equals("d"))
@@ -754,11 +742,12 @@ namespace ReserveCopier
                             try
                             {
                                 File.Copy(fs.FileFullName, savefilename, true);
+                                current_path = fs.FileFullName;
                             }
                             catch (Exception ex)
                             {
                                 dtLog.Rows.Add(DateTime.Now, "629.Ошибка : " + ex.Message);
-                                InterfaceUpdateTimer_Tick();
+                                //InterfaceUpdateTimer_Tick();
                             }
                             // так же скопируем в главную папку добавленное
                             if (fs.FileState.Equals("i") && modeint == 1)
@@ -769,11 +758,12 @@ namespace ReserveCopier
                                 try
                                 {
                                     File.Copy(fs.FileFullName, savefilename, true);
+                                    current_path = fs.FileFullName;
                                 }
                                 catch (Exception ex)
                                 {
                                     dtLog.Rows.Add(DateTime.Now, "645.Ошибка добавления в полную копию : " + ex.Message);
-                                    InterfaceUpdateTimer_Tick();
+                                    //InterfaceUpdateTimer_Tick();
                                 }
                             }
                             TotalFiles--;
@@ -782,7 +772,7 @@ namespace ReserveCopier
                             ProgressValue = (int)(((currsize / speedSize) * 100) + 0.5);
                             TotalSize = speedSize - currsize;
                             if (TotalSize < 0) TotalSize = 0;
-                            InterfaceUpdateTimer_Tick();
+                            //InterfaceUpdateTimer_Tick();
                         }
                         // скопируем удалённое из резерва
                         if (fs.FileState.Equals("d"))
@@ -798,11 +788,12 @@ namespace ReserveCopier
                                 try
                                 {
                                     File.Copy(reservFileName, savefilename, true);
+                                    current_path = reservFileName;
                                 }
                                 catch (Exception ex)
                                 {
                                     dtLog.Rows.Add(DateTime.Now, "629.Ошибка : " + ex.Message);
-                                    InterfaceUpdateTimer_Tick();
+                                    //InterfaceUpdateTimer_Tick();
                                 }
                                 TotalFiles--;
                                 currsize += fi.Length;
@@ -810,10 +801,10 @@ namespace ReserveCopier
                                 ProgressValue = (int)(((currsize / speedSize) * 100) + 0.5);
                                 TotalSize = speedSize - currsize;
                                 if (TotalSize < 0) TotalSize = 0;
-                                InterfaceUpdateTimer_Tick();
+                                //InterfaceUpdateTimer_Tick();
                             }
                         }
-                            TimeSpan ts = (DateTime.Now - starttime);
+                        TimeSpan ts = (DateTime.Now - starttime);
                         if (ts.TotalSeconds > 2)
                         {
                             speedMbs = (((currsize - lastsize) / (1024 * 1024)) / ts.TotalMilliseconds) * 1000;
@@ -821,23 +812,25 @@ namespace ReserveCopier
                             starttime = DateTime.Now;
                             lastsize = currsize;
                             lastFiles = TotalFiles;
-                            InterfaceUpdateTimer_Tick();
+                            //InterfaceUpdateTimer_Tick();
                         }
                     }
-                    dtLog.Rows.Add(DateTime.Now, "676. Скопированы файлы отличия." + diffFiledata.Count + " файлов");
-                    InterfaceUpdateTimer_Tick();
+                    ProgressValue = 100;
+                    TotalSize = 0;
+                    dtLog.Rows.Add(DateTime.Now, "676.Скопированы файлы отличия." + diffFiledata.Count + " файлов");
+                    //InterfaceUpdateTimer_Tick();
                 }
                 else
                 {
-                    dtLog.Rows.Add(DateTime.Now, "533.Ошибка. Не найден файл разности для режима №2.");
+                    dtLog.Rows.Add(DateTime.Now, "783.Ошибка. Не найден файл разности для режима №2.");
                     dtLog.Rows.Add(DateTime.Now, DiffFileName);
-                    InterfaceUpdateTimer_Tick();
+                    //InterfaceUpdateTimer_Tick();
                 }
             }
             //copying = false;
             step = 0;
             currstep = 0;
-            }
+        }
 
         private void autostart_chkbx_CheckedChanged(object sender, EventArgs e)
         {
@@ -847,6 +840,43 @@ namespace ReserveCopier
             Properties.Settings.Default.AutoStartCopy = autostart_chkbx.Checked;
             Properties.Settings.Default.Save();
             Properties.Settings.Default.Reload();
+        }
+
+        private void test_dt_checkBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (test_dt_checkBox.Checked)
+            {
+                testDT.BeginLoadData();
+            }
+            else testDT.EndLoadData();
+        }
+
+        private void test_dgv_checkBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (test_dgv_checkBox.Checked) test_dgv.ResumeLayout();
+            else test_dgv.SuspendLayout();
+            
+        }
+
+        private void test_add_row_bttn_Click(object sender, EventArgs e)
+        {
+            testDT.Rows.Add(testDT.Rows.Count);
+        }
+
+        private void test_bs_susp_checkBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (test_bs_susp_checkBox.Checked) testbs.ResumeBinding();
+            else testbs.SuspendBinding();
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox1.Checked)
+            {
+                testbs.RaiseListChangedEvents = true;
+                testbs.ResetBindings(false);
+            }
+            else testbs.RaiseListChangedEvents = false;
         }
     }
 }

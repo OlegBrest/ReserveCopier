@@ -30,6 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainReservCopyer));
             this.MainPanel = new System.Windows.Forms.Panel();
+            this.Path_txtBx = new System.Windows.Forms.TextBox();
             this.autostart_chkbx = new System.Windows.Forms.CheckBox();
             this.dataGridViewprogress = new System.Windows.Forms.DataGridView();
             this.SpeedLabel = new System.Windows.Forms.Label();
@@ -50,16 +51,25 @@
             this.main_tabControl = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.test_add_row_bttn = new System.Windows.Forms.Button();
+            this.test_dgv_checkBox = new System.Windows.Forms.CheckBox();
+            this.test_bs_susp_checkBox = new System.Windows.Forms.CheckBox();
+            this.test_dt_checkBox = new System.Windows.Forms.CheckBox();
+            this.test_dgv = new System.Windows.Forms.DataGridView();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.MainPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewprogress)).BeginInit();
             this.main_toolstrip_panel.SuspendLayout();
             this.panel1.SuspendLayout();
             this.main_tabControl.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.tabPage2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.test_dgv)).BeginInit();
             this.SuspendLayout();
             // 
             // MainPanel
             // 
+            this.MainPanel.Controls.Add(this.Path_txtBx);
             this.MainPanel.Controls.Add(this.autostart_chkbx);
             this.MainPanel.Controls.Add(this.dataGridViewprogress);
             this.MainPanel.Controls.Add(this.SpeedLabel);
@@ -79,6 +89,17 @@
             this.MainPanel.Size = new System.Drawing.Size(999, 498);
             this.MainPanel.TabIndex = 0;
             // 
+            // Path_txtBx
+            // 
+            this.Path_txtBx.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.Path_txtBx.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.Path_txtBx.Location = new System.Drawing.Point(240, 3);
+            this.Path_txtBx.Multiline = true;
+            this.Path_txtBx.Name = "Path_txtBx";
+            this.Path_txtBx.Size = new System.Drawing.Size(749, 37);
+            this.Path_txtBx.TabIndex = 10;
+            // 
             // autostart_chkbx
             // 
             this.autostart_chkbx.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -93,38 +114,19 @@
             this.autostart_chkbx.UseVisualStyleBackColor = true;
             this.autostart_chkbx.CheckedChanged += new System.EventHandler(this.autostart_chkbx_CheckedChanged);
             // 
-            this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar.Location = new System.Drawing.Point(230, 3);
-            this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(766, 25);
-            this.progressBar.TabIndex = 7;
-            this.progressBar.Visible = false;
-            // 
-            // SaveFullFileBttn
-            // 
-            this.SaveFullFileBttn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.SaveFullFileBttn.Location = new System.Drawing.Point(655, 417);
-            this.SaveFullFileBttn.Name = "SaveFullFileBttn";
-            this.SaveFullFileBttn.Size = new System.Drawing.Size(143, 71);
-            this.SaveFullFileBttn.TabIndex = 6;
-            this.SaveFullFileBttn.Text = "Сохранить полный файл";
-            this.SaveFullFileBttn.UseVisualStyleBackColor = true;
-            this.SaveFullFileBttn.Click += new System.EventHandler(this.SaveFullFileBttn_Click);
-            // 
             // dataGridViewprogress
             // 
             this.dataGridViewprogress.AllowUserToAddRows = false;
             this.dataGridViewprogress.AllowUserToDeleteRows = false;
-            this.dataGridViewprogress.AllowUserToOrderColumns = true;
             this.dataGridViewprogress.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridViewprogress.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
             this.dataGridViewprogress.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridViewprogress.Location = new System.Drawing.Point(5, 28);
+            this.dataGridViewprogress.Location = new System.Drawing.Point(5, 44);
             this.dataGridViewprogress.Name = "dataGridViewprogress";
-            this.dataGridViewprogress.Size = new System.Drawing.Size(984, 383);
+            this.dataGridViewprogress.ReadOnly = true;
+            this.dataGridViewprogress.Size = new System.Drawing.Size(984, 367);
             this.dataGridViewprogress.TabIndex = 5;
             this.dataGridViewprogress.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridViewprogress_DataError);
             // 
@@ -240,7 +242,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label1.Location = new System.Drawing.Point(1, 0);
+            this.label1.Location = new System.Drawing.Point(4, 3);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(232, 25);
@@ -322,6 +324,12 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.test_add_row_bttn);
+            this.tabPage2.Controls.Add(this.test_dgv_checkBox);
+            this.tabPage2.Controls.Add(this.checkBox1);
+            this.tabPage2.Controls.Add(this.test_bs_susp_checkBox);
+            this.tabPage2.Controls.Add(this.test_dt_checkBox);
+            this.tabPage2.Controls.Add(this.test_dgv);
             this.tabPage2.Location = new System.Drawing.Point(4, 29);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
@@ -329,6 +337,68 @@
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Обзор резервных копий";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // test_add_row_bttn
+            // 
+            this.test_add_row_bttn.Location = new System.Drawing.Point(498, 433);
+            this.test_add_row_bttn.Name = "test_add_row_bttn";
+            this.test_add_row_bttn.Size = new System.Drawing.Size(243, 45);
+            this.test_add_row_bttn.TabIndex = 2;
+            this.test_add_row_bttn.Text = "button1";
+            this.test_add_row_bttn.UseVisualStyleBackColor = true;
+            this.test_add_row_bttn.Click += new System.EventHandler(this.test_add_row_bttn_Click);
+            // 
+            // test_dgv_checkBox
+            // 
+            this.test_dgv_checkBox.AutoSize = true;
+            this.test_dgv_checkBox.Location = new System.Drawing.Point(254, 433);
+            this.test_dgv_checkBox.Name = "test_dgv_checkBox";
+            this.test_dgv_checkBox.Size = new System.Drawing.Size(64, 24);
+            this.test_dgv_checkBox.TabIndex = 1;
+            this.test_dgv_checkBox.Text = "DGV";
+            this.test_dgv_checkBox.UseVisualStyleBackColor = true;
+            this.test_dgv_checkBox.CheckedChanged += new System.EventHandler(this.test_dgv_checkBox_CheckedChanged);
+            // 
+            // test_bs_susp_checkBox
+            // 
+            this.test_bs_susp_checkBox.AutoSize = true;
+            this.test_bs_susp_checkBox.Location = new System.Drawing.Point(94, 463);
+            this.test_bs_susp_checkBox.Name = "test_bs_susp_checkBox";
+            this.test_bs_susp_checkBox.Size = new System.Drawing.Size(88, 24);
+            this.test_bs_susp_checkBox.TabIndex = 1;
+            this.test_bs_susp_checkBox.Text = "bs_susp";
+            this.test_bs_susp_checkBox.UseVisualStyleBackColor = true;
+            this.test_bs_susp_checkBox.CheckedChanged += new System.EventHandler(this.test_bs_susp_checkBox_CheckedChanged);
+            // 
+            // test_dt_checkBox
+            // 
+            this.test_dt_checkBox.AutoSize = true;
+            this.test_dt_checkBox.Location = new System.Drawing.Point(94, 433);
+            this.test_dt_checkBox.Name = "test_dt_checkBox";
+            this.test_dt_checkBox.Size = new System.Drawing.Size(98, 24);
+            this.test_dt_checkBox.TabIndex = 1;
+            this.test_dt_checkBox.Text = "DT. Begin";
+            this.test_dt_checkBox.UseVisualStyleBackColor = true;
+            this.test_dt_checkBox.CheckedChanged += new System.EventHandler(this.test_dt_checkBox_CheckedChanged);
+            // 
+            // test_dgv
+            // 
+            this.test_dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.test_dgv.Location = new System.Drawing.Point(3, 3);
+            this.test_dgv.Name = "test_dgv";
+            this.test_dgv.Size = new System.Drawing.Size(1002, 416);
+            this.test_dgv.TabIndex = 0;
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(254, 463);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(88, 24);
+            this.checkBox1.TabIndex = 1;
+            this.checkBox1.Text = "bs_raise";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // MainReservCopyer
             // 
@@ -350,6 +420,9 @@
             this.panel1.PerformLayout();
             this.main_tabControl.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
+            this.tabPage2.ResumeLayout(false);
+            this.tabPage2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.test_dgv)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -369,9 +442,7 @@
         private System.Windows.Forms.Label SizeLabel;
         private System.Windows.Forms.Label labelSize;
         private System.Windows.Forms.DataGridView dataGridViewprogress;
-        private System.Windows.Forms.Button SaveFullFileBttn;
         private System.Windows.Forms.ProgressBar progressBar;
-        private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label SpeedLabel;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Panel panel1;
@@ -379,6 +450,13 @@
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.CheckBox autostart_chkbx;
+        private System.Windows.Forms.TextBox Path_txtBx;
+        private System.Windows.Forms.Button test_add_row_bttn;
+        private System.Windows.Forms.CheckBox test_dgv_checkBox;
+        private System.Windows.Forms.CheckBox test_dt_checkBox;
+        private System.Windows.Forms.DataGridView test_dgv;
+        private System.Windows.Forms.CheckBox test_bs_susp_checkBox;
+        private System.Windows.Forms.CheckBox checkBox1;
     }
 }
 
