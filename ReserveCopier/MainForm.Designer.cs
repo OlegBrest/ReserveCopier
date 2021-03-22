@@ -53,10 +53,10 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.test_add_row_bttn = new System.Windows.Forms.Button();
             this.test_dgv_checkBox = new System.Windows.Forms.CheckBox();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.test_bs_susp_checkBox = new System.Windows.Forms.CheckBox();
             this.test_dt_checkBox = new System.Windows.Forms.CheckBox();
             this.test_dgv = new System.Windows.Forms.DataGridView();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.MainPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewprogress)).BeginInit();
             this.main_toolstrip_panel.SuspendLayout();
@@ -359,6 +359,17 @@
             this.test_dgv_checkBox.UseVisualStyleBackColor = true;
             this.test_dgv_checkBox.CheckedChanged += new System.EventHandler(this.test_dgv_checkBox_CheckedChanged);
             // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(254, 463);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(88, 24);
+            this.checkBox1.TabIndex = 1;
+            this.checkBox1.Text = "bs_raise";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            // 
             // test_bs_susp_checkBox
             // 
             this.test_bs_susp_checkBox.AutoSize = true;
@@ -388,17 +399,6 @@
             this.test_dgv.Name = "test_dgv";
             this.test_dgv.Size = new System.Drawing.Size(1002, 416);
             this.test_dgv.TabIndex = 0;
-            // 
-            // checkBox1
-            // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(254, 463);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(88, 24);
-            this.checkBox1.TabIndex = 1;
-            this.checkBox1.Text = "bs_raise";
-            this.checkBox1.UseVisualStyleBackColor = true;
-            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // MainReservCopyer
             // 

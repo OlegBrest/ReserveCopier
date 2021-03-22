@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ReserveCopier
@@ -14,8 +17,17 @@ namespace ReserveCopier
         int TotalFiles = 0;
         double TotalSize = 0;
         int log_rows = 0;
+        public struct LogStr
+        {
+            public DateTime dtstr { get; set; }
+            public string mssg { get; set; }
+        }
         DataTable dtLog = new DataTable();
-        BindingSource bs = new BindingSource();
+        BindingSource logbs = new BindingSource();
+
+        BindingList<LogStr> blistlog;
+        List<LogStr> loglist;
+
         //DataTable dtfiles = new DataTable();
         //bool MainDiffFileWrite = false; // индикатор записи полного файла
         /*        bool autostart = false; // индикатор выполнения автозапуска
@@ -44,22 +56,38 @@ namespace ReserveCopier
         System.Timers.Timer AutoCheckTimer = new System.Timers.Timer();
 
 
-        DataTable testDT = new DataTable();
+        BindingList<LogStr> testBSL = new BindingList<LogStr>();
         BindingSource testbs = new BindingSource();
 
         public MainReservCopyer()
         {
             InitializeComponent();
             SetDoubleBuffered(dataGridViewprogress);
+            /*
             dtLog.Columns.Add("Время", typeof(DateTime));
             dtLog.Columns.Add("Cообщение", typeof(string));
             dtLog.BeginLoadData();
-            bs.DataSource = dtLog;
-            dataGridViewprogress.DataSource = bs;
-            dataGridViewprogress.Columns[0].DefaultCellStyle.Format = "dd/MM/yyyy hh:mm:ss.fff";
+            logbs.DataSource = dtLog;
+            dataGridViewprogress.DataSource = logbs;
+            */
+            loglist = new List<LogStr>();
+            blistlog = new BindingList<LogStr>(loglist);
+            logbs = new BindingSource(blistlog, null);
+            dataGridViewprogress.DataSource = blistlog;
+
+            //dataGridViewprogress.Columns.Add ("data", "Время");
+            //dataGridViewprogress.Columns.Add("mssg", "Сообщение");
+            //dataGridViewprogress.Columns["data"].DefaultCellStyle.Format = "dd/MM/yyyy hh:mm:ss.fff";
+            loglist.Capacity = 200000;
+            dataGridViewprogress.Columns["dtstr"].HeaderText = "Время";
+            dataGridViewprogress.Columns["mssg"].HeaderText = "Сообщение";
+            dataGridViewprogress.Columns["dtstr"].DefaultCellStyle.Format = "dd/MM/yyyy hh:mm:ss.fff";
+            //  dataGridViewprogress.DataMember = "dtstr";
+
+
             InterfaceUpdateTimer.Elapsed += InterfaceUpdateTimer_Elapsed;
             InterfaceUpdateTimer.AutoReset = true;
-            InterfaceUpdateTimer.Interval = 100;
+            InterfaceUpdateTimer.Interval = 500;
             InterfaceUpdateTimer.Enabled = true;
             InterfaceUpdateTimer.Start();
 
@@ -72,12 +100,17 @@ namespace ReserveCopier
 
             trdfilecalc = new Thread(CalcTotalFileDirsCount);
             trdfilecopy = new Thread(CopyFiles);
-            dtLog.Rows.Add(DateTime.Now, "52.Программа прошла инициализацию.");
+            //dtLog.Rows.Add(DateTime.Now, "52.Программа прошла инициализацию.");
+            logg("87.Программа прошла инициализацию.");
+
             CheckPaths();
 
-            testDT.Columns.Add("test");
-            testbs.DataSource = testDT;
-            test_dgv.DataSource = testbs;
+            test_dgv.AutoGenerateColumns = true;
+            testbs.DataSource = testBSL;
+            //testbs.DataMember = "Lenght";
+            test_dgv.Columns.Add("test", "Тест");
+            test_dgv.Columns[0].DataPropertyName = "value";
+            test_dgv.DataSource = testBSL;
         }
 
         #region автозапуск
@@ -138,7 +171,8 @@ namespace ReserveCopier
                 }
                 catch (Exception ex)
                 {
-                    dtLog.Rows.Add(DateTime.Now, "169.Ошибка : " + ex.Message);
+                    //dtLog.Rows.Add(DateTime.Now, "169.Ошибка : " + ex.Message);
+                    logg("155.Ошибка : " + ex.Message);
                     //autostart = false;
                     //InterfaceUpdateTimer_Tick();
                 }
@@ -211,11 +245,11 @@ namespace ReserveCopier
         private void CalcTotalFileDirsCount(object _Paths)
         {
             string[] Paths = (string[])_Paths;
-            //Parallel.ForEach(Paths,path=>
-            foreach (string path in Paths)
+            Parallel.ForEach(Paths, path =>
+            //foreach (string path in Paths)
             {
                 checkForDirFile(path);
-            }//);
+            });
         }
 
         private void checkForDirFile(string path)
@@ -247,14 +281,16 @@ namespace ReserveCopier
                         catch (Exception ex)
                         {
                             //progressList.Add(DateTime.Now.ToLongTimeString() + " . Ошибка : " + ex.Message);
-                            dtLog.Rows.Add(DateTime.Now, "134.Ошибка : " + ex.Message);
+                            //dtLog.Rows.Add(DateTime.Now, "134.Ошибка : " + ex.Message);
+                            logg("265.Ошибка : " + ex.Message);
                             //InterfaceUpdateTimer_Tick();
                         }
                     }
                     catch (Exception ex)
                     {
                         //progressList.Add(DateTime.Now.ToLongTimeString() + " . Ошибка : " + ex.Message);
-                        dtLog.Rows.Add(DateTime.Now, "141.Ошибка : " + ex.Message);
+                        //dtLog.Rows.Add(DateTime.Now, "141.Ошибка : " + ex.Message);
+                        logg("273.Ошибка : " + ex.Message);
                         //InterfaceUpdateTimer_Tick();
                     }
                 }
@@ -383,44 +419,60 @@ namespace ReserveCopier
         }
         private void updateProgressView()
         {
-            if (log_rows != dtLog.Rows.Count)
+            if (log_rows != blistlog.Count) //dtLog.Rows.Count)
             {
-                if (dtLog.Rows.Count > 200)
+                /*if (dtLog.Rows.Count > 200)
                 {
                     int rws2del = (dtLog.Rows.Count - 200);
-                    for (int i = 0; i < rws2del;i++)
+                    for (int i = 0; i < rws2del; i++)
                     {
                         dtLog.Rows[0].Delete();
                     }
+                }*/
+                if (blistlog.Count > 200)
+                {
+                    int rws2del = (blistlog.Count - 200);
+                    for (int i = 0; i < rws2del; i++)
+                    {
+                        blistlog.RemoveAt(0);
+                    }
                 }
-                dtLog.EndLoadData();
-                int firstRow = dataGridViewprogress.FirstDisplayedScrollingRowIndex;
+
+                //dtLog.EndLoadData();
                 try
                 {
-                    bs.RaiseListChangedEvents = true;
-                    bs.ResetBindings(false);
-                    bs.RaiseListChangedEvents = false;
+                    /* bs.RaiseListChangedEvents = true;
+                     bs.ResetBindings(false);
+                     bs.RaiseListChangedEvents = false;*/
+                    blistlog.RaiseListChangedEvents = true;
+                    blistlog.ResetBindings();
+                    blistlog.RaiseListChangedEvents = false;
                 }
                 catch (Exception ex)
                 {
                     if (!ex.Message.Equals("Заданный аргумент находится вне диапазона допустимых значений.\r\nИмя параметра: rowIndex"))
-                    MessageBox.Show("226.MainForm.", ex.Message);
-                    dtLog.Rows.Add(DateTime.Now, "408.Ошибка." + ex.Message);
+                        MessageBox.Show("226.MainForm.", ex.Message);
+                    //dtLog.Rows.Add(DateTime.Now, "408.Ошибка." + ex.Message);
+                    logg("433.Ошибка." + ex.Message);
                 }
-                log_rows = dtLog.Rows.Count;
-                if (firstRow >= 0) dataGridViewprogress.FirstDisplayedScrollingRowIndex = firstRow;
-                if (Properties.Settings.Default.AutoScroolLog)
+                int firstRow = dataGridViewprogress.FirstDisplayedScrollingRowIndex;
+                log_rows = blistlog.Count;//dtLog.Rows.Count;
+                if (dataGridViewprogress.Rows.Count > 0)
                 {
-                    int lastvisrow = dataGridViewprogress.Rows.GetLastRow(DataGridViewElementStates.Visible);
-                    int lastdisprow = dataGridViewprogress.Rows.GetLastRow(DataGridViewElementStates.Displayed);
-                    if ((lastvisrow != lastdisprow) && (lastdisprow > 0))
+                    if (firstRow >= 0) dataGridViewprogress.FirstDisplayedScrollingRowIndex = firstRow;
+                    if (Properties.Settings.Default.AutoScroolLog)
                     {
-                        firstRow += (lastvisrow - lastdisprow);
-                        if (firstRow >= 0) dataGridViewprogress.FirstDisplayedScrollingRowIndex = firstRow;
+                        int lastvisrow = dataGridViewprogress.Rows.GetLastRow(DataGridViewElementStates.Visible);
+                        int lastdisprow = dataGridViewprogress.Rows.GetLastRow(DataGridViewElementStates.Displayed);
+                        if ((lastvisrow != lastdisprow) && (lastdisprow > 0))
+                        {
+                            firstRow += (lastvisrow - lastdisprow);
+                            if (firstRow >= 0) dataGridViewprogress.FirstDisplayedScrollingRowIndex = firstRow;
+                        }
                     }
                 }
                 dataGridViewprogress.Update();
-                dtLog.BeginLoadData();
+                //dtLog.BeginLoadData();
             }
 
         }
@@ -448,7 +500,8 @@ namespace ReserveCopier
 
         private void CheckPaths()
         {
-            dtLog.Rows.Add(DateTime.Now, "229.Перепроверю пути сохранения файлов");
+            //dtLog.Rows.Add(DateTime.Now, "229.Перепроверю пути сохранения файлов");
+            logg("484.Перепроверю пути сохранения файлов");
             //InterfaceUpdateTimer_Tick();
             DateTime dt1 = DateTime.Now;
             string CreateDiffDay = dt1.Year + "\\" + dt1.Month + "\\" + dt1.Day + "\\" + dt1.Hour + "." + dt1.Minute;
@@ -479,8 +532,10 @@ namespace ReserveCopier
             DiffFilePath = Properties.Settings.Default.OutputPath + "\\" + CreateDiffDay + "\\";
             Directory.CreateDirectory(DiffFilePath);
             DiffFileName = DiffFilePath + "DIFFILE.txt";
-            dtLog.Rows.Add(DateTime.Now, MainFileName);
-            dtLog.Rows.Add(DateTime.Now, DiffFileName);
+            //dtLog.Rows.Add(DateTime.Now, MainFileName);
+            //dtLog.Rows.Add(DateTime.Now, DiffFileName);
+            logg(MainFileName);
+            logg(DiffFileName);
             //InterfaceUpdateTimer_Tick();
 
         }
@@ -495,7 +550,8 @@ namespace ReserveCopier
                 // создаём полный файл полного копирования
                 if (mode == 0)
                 {
-                    dtLog.Rows.Add(DateTime.Now, "337.Записываю основной файл поверх старого." + currlines.Length + " записей.");
+                    //dtLog.Rows.Add(DateTime.Now, "337.Записываю основной файл поверх старого." + currlines.Length + " записей.");
+                    logg("534.Записываю основной файл поверх старого." + currlines.Length + " записей.");
                     //InterfaceUpdateTimer_Tick();
                     File.Delete(MainFileName);
                     File.WriteAllLines(MainFileName, currlines);
@@ -504,26 +560,34 @@ namespace ReserveCopier
                 else if (mode != 0)
                 {
                     #region заливаем предыдущий ДТ для сравнения
-                    dtLog.Rows.Add(DateTime.Now, "499.Читаю основной файл для последующего сравнения.");
+                    //dtLog.Rows.Add(DateTime.Now, "499.Читаю основной файл для последующего сравнения.");
+                    logg("544.Читаю основной файл для последующего сравнения.");
                     //InterfaceUpdateTimer_Tick();
                     mainFiledata.Clear();
                     string[] mainlines = File.ReadAllLines(MainFileName);
                     mainFiledata.InsertFromStrArr(mainlines, "");
-                    dtLog.Rows.Add(DateTime.Now, "504.Прочитан основной файл. Найдено " + mainFiledata.Count + " строк");
+                    //dtLog.Rows.Add(DateTime.Now, "504.Прочитан основной файл. Найдено " + mainFiledata.Count + " строк");
+                    logg("550.Прочитан основной файл. Найдено " + mainFiledata.Count + " строк");
                     #endregion
                     #region сравниваем и создаём ДТ разности для этого в разностный льём обе таблицы и вычленяем оттуда одинаковые строки
                     diffFiledata.Clear();
-                    dtLog.Rows.Add(DateTime.Now, "508.Заполняю кэш сравнения данными основного файла.");
+                    //dtLog.Rows.Add(DateTime.Now, "508.Заполняю кэш сравнения данными основного файла.");
+                    logg("555.Заполняю кэш сравнения данными основного файла.");
                     diffFiledata.InsertFromFD(mainFiledata, "d");
-                    dtLog.Rows.Add(DateTime.Now, "510.Заполняю кэш сравнения данными текущих файлов.");
+                    //dtLog.Rows.Add(DateTime.Now, "510.Заполняю кэш сравнения данными текущих файлов.");
+                    logg("558.Заполняю кэш сравнения данными текущих файлов.");
                     diffFiledata.InsertFromFD(currFileData, "i");
-                    dtLog.Rows.Add(DateTime.Now, "512.Кэш сравнения заполнен на " + diffFiledata.Count + " строк.");
-                    dtLog.Rows.Add(DateTime.Now, "513.Приступаю к поиску и удалению дубликатов");
+                    //dtLog.Rows.Add(DateTime.Now, "512.Кэш сравнения заполнен на " + diffFiledata.Count + " строк.");
+                    logg("561.Кэш сравнения заполнен на " + diffFiledata.Count + " строк.");
+                    //dtLog.Rows.Add(DateTime.Now, "513.Приступаю к поиску и удалению дубликатов");
+                    logg("563.Приступаю к поиску и удалению дубликатов");
                     diffFiledata.FindAndClearDuplicates();
-                    dtLog.Rows.Add(DateTime.Now, "515.Дубликаты удалены. Получилось " + diffFiledata.Count + " отличий.");
+                    //dtLog.Rows.Add(DateTime.Now, "515.Дубликаты удалены. Получилось " + diffFiledata.Count + " отличий.");
+                    logg("566.Дубликаты удалены. Получилось " + diffFiledata.Count + " отличий.");
                     string[] difflines = new string[0];
                     diffFiledata.ToStringArray(ref difflines);
-                    dtLog.Rows.Add(DateTime.Now, "518.Записываю файл отличий.");
+                    //dtLog.Rows.Add(DateTime.Now, "518.Записываю файл отличий.");
+                    logg("570.Записываю файл отличий.");
                     //InterfaceUpdateTimer_Tick();
                     File.WriteAllLines(DiffFileName, difflines);
                     if (mode == 2)
@@ -532,7 +596,8 @@ namespace ReserveCopier
                         // если нет полного файла то создаём , если есть то создаём новый разностный DIFFILE после заменяя MAINFULL
                         File.Delete(MainFileName);
                         currFileData.ToStringArray(ref currlines);
-                        dtLog.Rows.Add(DateTime.Now, "514.Перезаписываю основной файл новыми данными." + currFileData.Count + " записей.");
+                        //dtLog.Rows.Add(DateTime.Now, "514.Перезаписываю основной файл новыми данными." + currFileData.Count + " записей.");
+                        logg("580.Перезаписываю основной файл новыми данными." + currFileData.Count + " записей.");
                         // InterfaceUpdateTimer_Tick();
                         File.WriteAllLines(MainFileName, currlines);
                     }
@@ -546,7 +611,8 @@ namespace ReserveCopier
             else
             {
                 currFileData.ToStringArray(ref currlines);
-                dtLog.Rows.Add(DateTime.Now, "499.Записываю основной файл.");
+                //dtLog.Rows.Add(DateTime.Now, "499.Записываю основной файл.");
+                logg("595.Записываю основной файл.");
                 //InterfaceUpdateTimer_Tick();
                 File.WriteAllLines(MainFileName, currlines);
                 Properties.Settings.Default.LastFullTime = DateTime.MinValue;
@@ -569,60 +635,16 @@ namespace ReserveCopier
                     mainFiledata.InsertFromStrArr(File.ReadAllLines(MainFileName));
                     TotalSize = mainFiledata.GetTotalSize();
 
-                    long currsize = 0;
-                    DateTime starttime = DateTime.Now;
-                    int speedfiles = TotalFiles;
-                    double speedSize = TotalSize;
-                    double lastsize = 0;
-                    int lastFiles = TotalFiles;
-                    speedMbs = 0;
-                    speedFils = 0;
-                    foreach (FileData.FileStruct fs in mainFiledata.Files)
-                    {
+                    CopyFromDataFileToDisk(mainFiledata, true, modeint);
 
-                        if (File.Exists(fs.FileFullName))
-                        {
-                            FileInfo fi = new FileInfo(fs.FileFullName);
-                            string filename = fi.Name;
-                            string savefilename = MainFilePath + (fs.FileFullName.Replace(":", ""));
-                            string savingpath = savefilename.Replace(filename, "");
-                            if (!Directory.Exists(savingpath)) Directory.CreateDirectory(savingpath);
-                            try
-                            {
-                                File.Copy(fs.FileFullName, savefilename, true);
-                                current_path = fs.FileFullName;
-                            }
-                            catch (Exception ex)
-                            {
-                                dtLog.Rows.Add(DateTime.Now, "356.Ошибка : " + ex.Message);
-                                //InterfaceUpdateTimer_Tick();
-                            }
-                            TotalFiles--;
-                            currsize += fi.Length;
-
-                            ProgressValue = (int)(((currsize / speedSize) * 100) + 0.5);
-                            TotalSize = speedSize - currsize;
-                            if (TotalSize < 0) TotalSize = 0;
-                            //InterfaceUpdateTimer_Tick();
-                        }
-                        TimeSpan ts = (DateTime.Now - starttime);
-                        if (ts.TotalSeconds > 2)
-                        {
-                            speedMbs = (((currsize - lastsize) / (1024 * 1024)) / ts.TotalMilliseconds) * 1000;
-                            speedFils = (lastFiles - TotalFiles) / ts.TotalSeconds;
-                            starttime = DateTime.Now;
-                            lastsize = currsize;
-                            lastFiles = TotalFiles;
-                            //InterfaceUpdateTimer_Tick();
-                        }
-                    }
                     Properties.Settings.Default.LastFullTime = DateTime.Now;
                     Properties.Settings.Default.Save();
                     Properties.Settings.Default.Reload();
                 }
                 else
                 {
-                    dtLog.Rows.Add(DateTime.Now, "381.Ошибка : Не найден основной файл-список.");
+                    //dtLog.Rows.Add(DateTime.Now, "381.Ошибка : Не найден основной файл-список.");
+                    logg("673.Ошибка : Не найден основной файл-список.");
                     //InterfaceUpdateTimer_Tick();
                 }
             }
@@ -654,56 +676,10 @@ namespace ReserveCopier
                     mainFiledata.InsertFromStrArr(File.ReadAllLines(MainFileName));
                     TotalSize = mainFiledata.GetTotalSize();
 
-                    long currsize = 0;
-                    DateTime starttime = DateTime.Now;
-                    int speedfiles = TotalFiles;
-                    double speedSize = TotalSize;
-                    double lastsize = 0;
-                    int lastFiles = TotalFiles;
-                    speedMbs = 0;
-                    speedFils = 0;
-                    dtLog.Rows.Add(DateTime.Now, "555.Копирую основные файлы.");
-                    //InterfaceUpdateTimer_Tick();
-                    TotalFiles = mainFiledata.Count;
-                    foreach (FileData.FileStruct fs in mainFiledata.Files)
-                    {
-                        if (File.Exists(fs.FileFullName))
-                        {
-                            FileInfo fi = new FileInfo(fs.FileFullName);
-                            string filename = fi.Name;
-                            string savefilename = MainFilePath + (fs.FileFullName.Replace(":", ""));
-                            string savingpath = savefilename.Replace(filename, "");
-                            if (!Directory.Exists(savingpath)) Directory.CreateDirectory(savingpath);
-                            try
-                            {
-                                File.Copy(fs.FileFullName, savefilename, true);
-                                current_path = fs.FileFullName;
-                            }
-                            catch (Exception ex)
-                            {
-                                dtLog.Rows.Add(DateTime.Now, "356.Ошибка : " + ex.Message);
-                                //InterfaceUpdateTimer_Tick();
-                            }
-                            TotalFiles--;
-                            currsize += fi.Length;
+                    CopyFromDataFileToDisk(mainFiledata, true, modeint);
 
-                            ProgressValue = (int)(((currsize / speedSize) * 100) + 0.5);
-                            TotalSize = speedSize - currsize;
-                            if (TotalSize < 0) TotalSize = 0;
-                            //InterfaceUpdateTimer_Tick();
-                        }
-                        TimeSpan ts = (DateTime.Now - starttime);
-                        if (ts.TotalSeconds > 2)
-                        {
-                            speedMbs = (((currsize - lastsize) / (1024 * 1024)) / ts.TotalMilliseconds) * 1000;
-                            speedFils = (lastFiles - TotalFiles) / ts.TotalSeconds;
-                            starttime = DateTime.Now;
-                            lastsize = currsize;
-                            lastFiles = TotalFiles;
-                            //InterfaceUpdateTimer_Tick();
-                        }
-                    }
-                    dtLog.Rows.Add(DateTime.Now, "595.Скопированы основные файлы." + mainFiledata.Count + " файлов");
+                    //dtLog.Rows.Add(DateTime.Now, "595.Скопированы основные файлы." + mainFiledata.Count + " файлов");
+                    logg("757.Скопированы основные файлы." + mainFiledata.Count + " файлов");
                     //InterfaceUpdateTimer_Tick();
                     Properties.Settings.Default.LastFullTime = DateTime.Now;
                     Properties.Settings.Default.Save();
@@ -711,7 +687,8 @@ namespace ReserveCopier
                 }
                 else if (!File.Exists(MainFileName))
                 {
-                    dtLog.Rows.Add(DateTime.Now, "596.Ошибка : Не найден основной файл-список.");
+                    //dtLog.Rows.Add(DateTime.Now, "596.Ошибка : Не найден основной файл-список.");
+                    logg("766.Ошибка : Не найден основной файл-список.");
                     //InterfaceUpdateTimer_Tick();
                 }
                 if (File.Exists(DiffFileName))
@@ -720,7 +697,10 @@ namespace ReserveCopier
                     diffFiledata.InsertFromStrArr(File.ReadAllLines(DiffFileName));
                     TotalSize = diffFiledata.GetTotalSize();
                     TotalFiles = diffFiledata.Count;
-                    long currsize = 0;
+                    logg("784.Копирую файлы отличия.");
+
+                    CopyFromDataFileToDisk(diffFiledata, false, modeint);
+                    /*long currsize = 0;
                     DateTime starttime = DateTime.Now;
                     int speedfiles = TotalFiles;
                     double speedSize = TotalSize;
@@ -728,7 +708,8 @@ namespace ReserveCopier
                     int lastFiles = TotalFiles;
                     speedMbs = 0;
                     speedFils = 0;
-                    dtLog.Rows.Add(DateTime.Now, "621.Копирую файлы отличия.");
+                    //dtLog.Rows.Add(DateTime.Now, "621.Копирую файлы отличия.");
+
                     //InterfaceUpdateTimer_Tick();
                     foreach (FileData.FileStruct fs in diffFiledata.Files)
                     {
@@ -746,7 +727,8 @@ namespace ReserveCopier
                             }
                             catch (Exception ex)
                             {
-                                dtLog.Rows.Add(DateTime.Now, "629.Ошибка : " + ex.Message);
+                                //dtLog.Rows.Add(DateTime.Now, "629.Ошибка : " + ex.Message);
+                                logg("803.Ошибка : " + ex.Message);
                                 //InterfaceUpdateTimer_Tick();
                             }
                             // так же скопируем в главную папку добавленное
@@ -762,7 +744,8 @@ namespace ReserveCopier
                                 }
                                 catch (Exception ex)
                                 {
-                                    dtLog.Rows.Add(DateTime.Now, "645.Ошибка добавления в полную копию : " + ex.Message);
+                                    //dtLog.Rows.Add(DateTime.Now, "645.Ошибка добавления в полную копию : " + ex.Message);
+                                    logg("820.Ошибка добавления в полную копию : " + ex.Message);
                                     //InterfaceUpdateTimer_Tick();
                                 }
                             }
@@ -792,7 +775,8 @@ namespace ReserveCopier
                                 }
                                 catch (Exception ex)
                                 {
-                                    dtLog.Rows.Add(DateTime.Now, "629.Ошибка : " + ex.Message);
+                                    //dtLog.Rows.Add(DateTime.Now, "629.Ошибка : " + ex.Message);
+                                    logg("851.Ошибка : " + ex.Message);
                                     //InterfaceUpdateTimer_Tick();
                                 }
                                 TotalFiles--;
@@ -814,16 +798,19 @@ namespace ReserveCopier
                             lastFiles = TotalFiles;
                             //InterfaceUpdateTimer_Tick();
                         }
-                    }
+                    }*/
                     ProgressValue = 100;
                     TotalSize = 0;
-                    dtLog.Rows.Add(DateTime.Now, "676.Скопированы файлы отличия." + diffFiledata.Count + " файлов");
+                    //dtLog.Rows.Add(DateTime.Now, "676.Скопированы файлы отличия." + diffFiledata.Count + " файлов");
+                    logg("877.Скопированы файлы отличия." + diffFiledata.Count + " файлов");
                     //InterfaceUpdateTimer_Tick();
                 }
                 else
                 {
-                    dtLog.Rows.Add(DateTime.Now, "783.Ошибка. Не найден файл разности для режима №2.");
-                    dtLog.Rows.Add(DateTime.Now, DiffFileName);
+                    //dtLog.Rows.Add(DateTime.Now, "783.Ошибка. Не найден файл разности для режима №2.");
+                    //dtLog.Rows.Add(DateTime.Now, DiffFileName);
+                    logg("884.Ошибка. Не найден файл разности для режима №2.");
+                    logg(DiffFileName);
                     //InterfaceUpdateTimer_Tick();
                 }
             }
@@ -832,6 +819,115 @@ namespace ReserveCopier
             currstep = 0;
         }
 
+        private void CopyFromDataFileToDisk(FileData df, bool isMain = true, int modeint = 1)
+        {
+            long currsize = 0;
+            DateTime starttime = DateTime.Now;
+            int speedfiles = TotalFiles;
+            double speedSize = TotalSize;
+            double lastsize = 0;
+            int lastFiles = TotalFiles;
+            speedMbs = 0;
+            speedFils = 0;
+            int maxThreads = 20;
+            int currThreads = 0;
+            //foreach (FileData.FileStruct fs in df.Files)
+            Parallel.ForEach(df.Files, fs =>
+            {
+                while (currThreads > maxThreads) Thread.Sleep(10);
+                currThreads++;
+                if (File.Exists(fs.FileFullName) && ((!isMain && !fs.FileState.Equals("d")) || isMain))
+                {
+                    FileInfo fi = new FileInfo(fs.FileFullName);
+                    string filename = fi.Name;
+                    string savefilename = MainFilePath + (fs.FileFullName.Replace(":", ""));
+                    string savingpath = savefilename.Replace(filename, "");
+                    if (!Directory.Exists(savingpath)) Directory.CreateDirectory(savingpath);
+                    try
+                    {
+                        File.Copy(fs.FileFullName, savefilename, true);
+                        current_path = fs.FileFullName;
+                    }
+                    catch (Exception ex)
+                    {
+                        logg("898.Ошибка : " + ex.Message);
+                    }
+
+                    if (!isMain)
+                    {
+                        // так же скопируем в главную папку добавленное
+                        if (fs.FileState.Equals("i") && modeint == 1)
+                        {
+                            savefilename = MainFilePath + (fs.FileFullName.Replace(":", ""));
+                            savingpath = savefilename.Replace(filename, "");
+                            if (!Directory.Exists(savingpath)) Directory.CreateDirectory(savingpath);
+                            try
+                            {
+                                File.Copy(fs.FileFullName, savefilename, true);
+                                current_path = fs.FileFullName;
+                            }
+                            catch (Exception ex)
+                            {
+                                //dtLog.Rows.Add(DateTime.Now, "645.Ошибка добавления в полную копию : " + ex.Message);
+                                logg("864.Ошибка добавления в полную копию : " + ex.Message);
+                                //InterfaceUpdateTimer_Tick();
+                            }
+                        }
+                        // скопируем удалённое из резерва
+                        if (fs.FileState.Equals("d"))
+                        {
+                            string reservFileName = MainFilePath + (fs.FileFullName.Replace(":", ""));
+                            if (File.Exists(reservFileName))
+                            {
+                                fi = new FileInfo(reservFileName);
+                                filename = fi.Name;
+                                savefilename = DiffFilePath + (fs.FileFullName.Replace(":", ""));
+                                savingpath = savefilename.Replace(filename, "");
+                                if (!Directory.Exists(savingpath)) Directory.CreateDirectory(savingpath);
+                                try
+                                {
+                                    File.Copy(reservFileName, savefilename, true);
+                                    current_path = reservFileName;
+                                }
+                                catch (Exception ex)
+                                {
+                                    //dtLog.Rows.Add(DateTime.Now, "629.Ошибка : " + ex.Message);
+                                    logg("889.Ошибка : " + ex.Message);
+                                    //InterfaceUpdateTimer_Tick();
+                                }
+                                TotalFiles--;
+                                currsize += fi.Length;
+
+                                ProgressValue = (int)(((currsize / speedSize) * 100) + 0.5);
+                                TotalSize = speedSize - currsize;
+                                if (TotalSize < 0) TotalSize = 0;
+                                //InterfaceUpdateTimer_Tick();
+                            }
+                        }
+
+                    }
+
+                    TotalFiles--;
+                    currsize += fi.Length;
+
+                    ProgressValue = (int)(((currsize / speedSize) * 100) + 0.5);
+                    TotalSize = speedSize - currsize;
+                    if (TotalSize < 0) TotalSize = 0;
+                }
+                TimeSpan ts = (DateTime.Now - starttime);
+                if (ts.TotalSeconds > 2)
+                {
+                    speedMbs = (((currsize - lastsize) / (1024 * 1024)) / ts.TotalMilliseconds) * 1000;
+                    speedFils = (lastFiles - TotalFiles) / ts.TotalSeconds;
+                    starttime = DateTime.Now;
+                    lastsize = currsize;
+                    lastFiles = TotalFiles;
+                    //InterfaceUpdateTimer_Tick();
+                }
+                currThreads--;
+            });
+
+        }
         private void autostart_chkbx_CheckedChanged(object sender, EventArgs e)
         {
             //autostart = false;
@@ -844,23 +940,21 @@ namespace ReserveCopier
 
         private void test_dt_checkBox_CheckedChanged(object sender, EventArgs e)
         {
-            if (test_dt_checkBox.Checked)
-            {
-                testDT.BeginLoadData();
-            }
-            else testDT.EndLoadData();
+
         }
 
         private void test_dgv_checkBox_CheckedChanged(object sender, EventArgs e)
         {
             if (test_dgv_checkBox.Checked) test_dgv.ResumeLayout();
             else test_dgv.SuspendLayout();
-            
+
         }
 
         private void test_add_row_bttn_Click(object sender, EventArgs e)
         {
-            testDT.Rows.Add(testDT.Rows.Count);
+
+            //test_dgv.DataSource = testBSL;
+            testBSL.Add(new LogStr() { dtstr = DateTime.Now, mssg = "dfsdf" });
         }
 
         private void test_bs_susp_checkBox_CheckedChanged(object sender, EventArgs e)
@@ -877,6 +971,17 @@ namespace ReserveCopier
                 testbs.ResetBindings(false);
             }
             else testbs.RaiseListChangedEvents = false;
+        }
+
+        private void logg(string msg)
+        {
+            //dtLog.Rows.Add(DateTime.Now, msg);
+
+            LogStr ls = new LogStr();
+            ls.dtstr = DateTime.Now;
+            ls.mssg = msg;
+            loglist.Add(ls);
+            //blistlog.Add(ls);
         }
     }
 }

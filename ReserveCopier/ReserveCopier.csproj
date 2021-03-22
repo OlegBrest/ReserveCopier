@@ -93,6 +93,14 @@
       <DependentUpon>SettingForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
+    <None Include="Properties\DataSources\FileData.datasource" />
+    <None Include="Properties\DataSources\FileData.FileStruct.datasource" />
+    <None Include="Properties\DataSources\MainReservCopyer.datasource" />
+    <None Include="Properties\DataSources\MainReservCopyer.LogStr.datasource" />
+    <None Include="Properties\DataSources\Program.datasource" />
+    <None Include="Properties\DataSources\ReserveCopier.Properties.Resources.datasource" />
+    <None Include="Properties\DataSources\ReserveCopier.Properties.Settings.datasource" />
+    <None Include="Properties\DataSources\SettingForm.datasource" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
