@@ -388,30 +388,33 @@ namespace ReserveCopier
                     {
                         for (int fs2 = (Count - 1); fs2 > fs1; fs2--)
                         {
-                            if (Files[fs1].FileFullName.Equals(Files[fs2].FileFullName))
+                            if ((Files[fs1].FileFullName != null) && (Files[fs2].FileFullName != null))
                             {
-                                FileStruct fss = new FileStruct();
-                                fss.FileFullName = Files[fs1].FileFullName;
-                                fss.FileSize = Files[fs1].FileSize;
-                                fss.FileChangeTime = Files[fs1].FileChangeTime;
-                                fss.FileState = Files[fs1].FileState;
-                                if ((Files[fs1].FileSize == Files[fs2].FileSize) && (Files[fs1].FileChangeTime.Equals(Files[fs2].FileChangeTime)))
+                                if (Files[fs1].FileFullName.Equals(Files[fs2].FileFullName))
                                 {
-                                    fss.FileState = "0";
+                                    FileStruct fss = new FileStruct();
+                                    fss.FileFullName = Files[fs1].FileFullName;
+                                    fss.FileSize = Files[fs1].FileSize;
+                                    fss.FileChangeTime = Files[fs1].FileChangeTime;
+                                    fss.FileState = Files[fs1].FileState;
+                                    if ((Files[fs1].FileSize == Files[fs2].FileSize) && (Files[fs1].FileChangeTime.Equals(Files[fs2].FileChangeTime)))
+                                    {
+                                        fss.FileState = "0";
 
-                                    Files[fs1] = fss;
-                                    Files[fs2] = fss;
-                                    _delcnt += 2;
+                                        Files[fs1] = fss;
+                                        Files[fs2] = fss;
+                                        _delcnt += 2;
+                                    }
+                                    else
+                                    {
+                                        fss.FileState = "m";
+                                        Files[fs1] = fss;
+                                        fss.FileState = "0";
+                                        Files[fs2] = fss;
+                                        _delcnt++;
+                                    }
+                                    break;
                                 }
-                                else
-                                {
-                                    fss.FileState = "m";
-                                    Files[fs1] = fss;
-                                    fss.FileState = "0";
-                                    Files[fs2] = fss;
-                                    _delcnt++;
-                                }
-                                break;
                             }
                         }
                     }

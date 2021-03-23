@@ -852,14 +852,14 @@ namespace ReserveCopier
                     if (!Directory.Exists(savingpath)) Directory.CreateDirectory(savingpath);
                     try
                     {
-                        if (fs.FileFullName.Length < 255 && savefilename.Length < 255)
+                        if ((fs.FileFullName.Length < 32767) && (savefilename.Length < 32767))
                         {
                             File.Copy(fs.FileFullName, savefilename, true);
                             current_path = fs.FileFullName;
                         }
                         else
                         {
-                            logg("855.Ошибка : Слишком длинный путь " + ((fs.FileFullName.Length < 255) ? savefilename : fs.FileFullName));
+                            logg("855.Ошибка : Слишком длинный путь " + ((fs.FileFullName.Length < 32767) ? savefilename : fs.FileFullName));
                         }
                     }
                     catch (Exception ex)
@@ -877,14 +877,14 @@ namespace ReserveCopier
                             if (!Directory.Exists(savingpath)) Directory.CreateDirectory(savingpath);
                             try
                             {
-                                if (fs.FileFullName.Length < 255 && savefilename.Length < 255)
+                                if ((fs.FileFullName.Length < 32767) && (savefilename.Length < 32767))
                                 {
                                     File.Copy(fs.FileFullName, savefilename, true);
                                     current_path = fs.FileFullName;
                                 }
                                 else
                                 {
-                                    logg("855.Ошибка : Слишком длинный путь " + ((fs.FileFullName.Length < 255) ? savefilename : fs.FileFullName));
+                                    logg("855.Ошибка : Слишком длинный путь " + ((fs.FileFullName.Length < 32767) ? savefilename : fs.FileFullName));
                                 }
                             }
                             catch (Exception ex)
@@ -907,14 +907,14 @@ namespace ReserveCopier
                                 if (!Directory.Exists(savingpath)) Directory.CreateDirectory(savingpath);
                                 try
                                 {
-                                    if (reservFileName.Length < 255 && savefilename.Length < 255)
+                                    if ((reservFileName.Length < 32767) && (savefilename.Length < 32767))
                                     {
                                         File.Copy(reservFileName, savefilename, true);
                                         current_path = reservFileName;
                                     }
                                     else
                                     {
-                                        logg("855.Ошибка : Слишком длинный путь " + ((reservFileName.Length < 255) ? savefilename : fs.FileFullName));
+                                        logg("855.Ошибка : Слишком длинный путь " + ((reservFileName.Length < 32767) ? savefilename : fs.FileFullName));
                                     }
                                 }
                                 catch (Exception ex)
