@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -245,13 +246,18 @@ namespace ReserveCopier
         private void CalcTotalFileDirsCount(object _Paths)
         {
             string[] Paths = (string[])_Paths;
-            Parallel.ForEach(Paths, path =>
-            //foreach (string path in Paths)
+            //Параллельность портит данные по размерам файлов
+            //Parallel.ForEach(Paths, path =>
+            foreach (string path in Paths)
             {
                 checkForDirFile(path);
-            });
+            }//);
         }
 
+        /// <summary>
+        /// Запись в основной файл данных о файлах и каталогах
+        /// </summary>
+        /// <param name="path"></param>
         private void checkForDirFile(string path)
         {
             if (File.Exists(path))
@@ -264,7 +270,7 @@ namespace ReserveCopier
                     long length = fi.Length;
                     long chgtime = fi.LastWriteTime.Ticks;
                     TotalSize += length;
-                    currFileData.AddRow(path, length, chgtime);
+                    currFileData.AddRow("FILE", path, length, chgtime);
                 }
                 else
                 {
@@ -283,6 +289,7 @@ namespace ReserveCopier
                         try
                         {
                             string[] files = Directory.GetFiles(path);
+                            if (files.Count() == 0) currFileData.AddRow("DIR", path, 0, 0);
                             CalcTotalFileDirsCount(files);
                         }
                         catch (Exception ex)
@@ -707,7 +714,7 @@ namespace ReserveCopier
                     logg("784.Копирую файлы отличия.");
 
                     CopyFromDataFileToDisk(diffFiledata, false, modeint);
-                    /*long currsize = 0;
+                    long currsize = 0;
                     DateTime starttime = DateTime.Now;
                     int speedfiles = TotalFiles;
                     double speedSize = TotalSize;
@@ -805,7 +812,7 @@ namespace ReserveCopier
                             lastFiles = TotalFiles;
                             //InterfaceUpdateTimer_Tick();
                         }
-                    }*/
+                    }
                     ProgressValue = 100;
                     TotalSize = 0;
                     //dtLog.Rows.Add(DateTime.Now, "676.Скопированы файлы отличия." + diffFiledata.Count + " файлов");
@@ -848,7 +855,7 @@ namespace ReserveCopier
                     FileInfo fi = new FileInfo(fs.FileFullName);
                     string filename = fi.Name;
                     string savefilename = MainFilePath + (fs.FileFullName.Replace(":", ""));
-                    string savingpath = savefilename.Replace(filename, "");
+                    string savingpath = savefilename.Substring(0, savefilename.Length - filename.Length);
                     if (!Directory.Exists(savingpath)) Directory.CreateDirectory(savingpath);
                     try
                     {
@@ -873,7 +880,7 @@ namespace ReserveCopier
                         if (fs.FileState.Equals("i") && modeint == 1)
                         {
                             savefilename = MainFilePath + (fs.FileFullName.Replace(":", ""));
-                            savingpath = savefilename.Replace(filename, "");
+                            savingpath = savefilename.Substring(0, savefilename.Length - filename.Length);
                             if (!Directory.Exists(savingpath)) Directory.CreateDirectory(savingpath);
                             try
                             {
@@ -942,6 +949,11 @@ namespace ReserveCopier
                     TotalSize = speedSize - currsize;
                     if (TotalSize < 0) TotalSize = 0;
                 }
+                else if (fs.Type == "DIR")
+                {
+                    string savedirname = MainFilePath + (fs.FileFullName.Replace(":", ""));
+                    if (!Directory.Exists(savedirname)) Directory.CreateDirectory(savedirname);
+                }
                 TimeSpan ts = (DateTime.Now - starttime);
                 if (ts.TotalSeconds > 2)
                 {
@@ -954,7 +966,6 @@ namespace ReserveCopier
                 }
                 currThreads--;
             });
-
         }
         private void autostart_chkbx_CheckedChanged(object sender, EventArgs e)
         {

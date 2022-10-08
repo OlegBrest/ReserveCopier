@@ -15,6 +15,7 @@ namespace ReserveCopier
 
         public struct FileStruct
         {
+            public string Type; // FILE , DIR
             public string FileFullName;
             public long FileSize;
             public long FileChangeTime;
@@ -50,10 +51,12 @@ namespace ReserveCopier
                         if (dt.Columns.Count > 3) Files[rowscnt].FileState = dr[3].ToString();
                         */
                         FileStruct fs = new FileStruct();
-                        if (dt.Columns.Count > 0) fs.FileFullName = dr[0].ToString();
-                        if (dt.Columns.Count > 1) fs.FileSize = (long)dr[1];
-                        if (dt.Columns.Count > 2) fs.FileChangeTime = (long)(dr[2]);
-                        if (dt.Columns.Count > 3) fs.FileState = dr[3].ToString();
+                        if (dt.Columns.Count > 0) fs.Type = dr[0].ToString();
+                        if (dt.Columns.Count > 1) fs.FileFullName = dr[1].ToString();
+                        if (dt.Columns.Count > 2) fs.FileSize = (long)dr[2];
+                        if (dt.Columns.Count > 3) fs.FileChangeTime = (long)(dr[3]);
+                        if (dt.Columns.Count > 4) fs.FileState = dr[4].ToString();
+
                         Files.Add(fs);
                     }
                     catch (Exception ex)
@@ -84,10 +87,11 @@ namespace ReserveCopier
                         if (dt.Columns.Count > 2) Files[rowscnt].FileChangeTime = (long)(dr[2]);
                         Files[rowscnt].FileState = state;*/
                         FileStruct fs = new FileStruct();
-                        if (dt.Columns.Count > 0) fs.FileFullName = dr[0].ToString();
-                        if (dt.Columns.Count > 1) fs.FileSize = (long)dr[1];
-                        if (dt.Columns.Count > 2) fs.FileChangeTime = (long)(dr[2]);
-                        if (dt.Columns.Count > 3) fs.FileState = state;
+                        if (dt.Columns.Count > 0) fs.Type = dr[0].ToString();
+                        if (dt.Columns.Count > 1) fs.FileFullName = dr[1].ToString();
+                        if (dt.Columns.Count > 2) fs.FileSize = (long)dr[2];
+                        if (dt.Columns.Count > 3) fs.FileChangeTime = (long)(dr[3]);
+                        if (dt.Columns.Count > 4) fs.FileState = dr[4].ToString();
                         Files.Add(fs);
                     }
                     catch (Exception ex)
@@ -159,13 +163,8 @@ namespace ReserveCopier
                     {
                         try
                         {
-                            /*Files[Count].FileFullName = fs.FileFullName;
-                            Files[Count].FileSize = fs.FileSize;
-                            Files[Count].FileChangeTime = fs.FileChangeTime;
-                            Files[Count].FileState = state;
-                            Count++;
-                             */
                             FileStruct fss = new FileStruct();
+                            fss.Type = fs.Type;
                             fss.FileFullName = fs.FileFullName;
                             fss.FileSize = fs.FileSize;
                             fss.FileChangeTime = fs.FileChangeTime;
@@ -217,9 +216,10 @@ namespace ReserveCopier
                                 Count++;
                                 */
                                 FileStruct fss = new FileStruct();
-                                fss.FileFullName = sr[0];
-                                fss.FileSize = Convert.ToInt64(sr[1]);
-                                fss.FileChangeTime = Convert.ToInt64(sr[2]);
+                                fss.Type = sr[0];
+                                fss.FileFullName = sr[1];
+                                fss.FileSize = Convert.ToInt64(sr[2]);
+                                fss.FileChangeTime = Convert.ToInt64(sr[3]);
                                 fss.FileState = state;
                                 Files.Add(fss);
                             }
@@ -267,10 +267,11 @@ namespace ReserveCopier
                             Files[Count].FileState = sr[3];
                             Count++;*/
                             FileStruct fss = new FileStruct();
-                            fss.FileFullName = sr[0];
-                            fss.FileSize = Convert.ToInt64(sr[1]);
-                            fss.FileChangeTime = Convert.ToInt64(sr[2]);
-                            fss.FileState = sr[3];
+                            fss.Type = sr[0];
+                            fss.FileFullName = sr[1];
+                            fss.FileSize = Convert.ToInt64(sr[2]);
+                            fss.FileChangeTime = Convert.ToInt64(sr[3]);
+                            fss.FileState = sr[4];
                             Files.Add(fss);
                         }
                         catch (Exception ex)
@@ -304,7 +305,7 @@ namespace ReserveCopier
                 {
                     try
                     {
-                        inpArray[i] = Files[i].FileFullName + "|" + Files[i].FileSize + "|" + Files[i].FileChangeTime + "|" + Files[i].FileState;
+                        inpArray[i] = Files[i].Type + "|"+Files[i].FileFullName + "|" + Files[i].FileSize + "|" + Files[i].FileChangeTime + "|" + Files[i].FileState;
                     }
                     catch (Exception ex)
                     {
@@ -330,7 +331,7 @@ namespace ReserveCopier
             }
         }
 
-        public void AddRow(string FileFullName, long FileSize, long FileChangeTime, string FileState = "")
+        public void AddRow(string Type,string FileFullName, long FileSize, long FileChangeTime, string FileState = "")
         {
             isBusy();
             if (!_isBusy)
@@ -362,6 +363,7 @@ namespace ReserveCopier
                 _fs = null;
                 */
                 FileStruct fs = new FileStruct();
+                fs.Type = Type;
                 fs.FileFullName = FileFullName;
                 fs.FileSize = FileSize;
                 fs.FileChangeTime = FileChangeTime;
@@ -384,20 +386,21 @@ namespace ReserveCopier
                 //for (int fs1 = 0; fs1 < Count; fs1++)
                 Parallel.For(0, Count, fs1 =>
                 {
-                    if ((!Files[fs1].FileState.Equals("m")) && (!Files[fs1].FileState.Equals("0")))
+                    if ((Files[fs1].FileState!="m") && (Files[fs1].FileState!="0"))
                     {
                         for (int fs2 = (Count - 1); fs2 > fs1; fs2--)
                         {
-                            if ((Files[fs1].FileFullName != null) && (Files[fs2].FileFullName != null))
+                            if ((Files[fs1].FileFullName != null) && (Files[fs2].FileFullName != null) && ((Files[fs2].FileState!="m") && (Files[fs2].FileState!="0"))) 
                             {
-                                if (Files[fs1].FileFullName.Equals(Files[fs2].FileFullName))
+                                if (Files[fs1].FileFullName == Files[fs2].FileFullName)
                                 {
                                     FileStruct fss = new FileStruct();
+                                    fss.Type = Files[fs1].Type;
                                     fss.FileFullName = Files[fs1].FileFullName;
                                     fss.FileSize = Files[fs1].FileSize;
                                     fss.FileChangeTime = Files[fs1].FileChangeTime;
                                     fss.FileState = Files[fs1].FileState;
-                                    if ((Files[fs1].FileSize == Files[fs2].FileSize) && (Files[fs1].FileChangeTime.Equals(Files[fs2].FileChangeTime)))
+                                    if ((Files[fs1].FileSize == Files[fs2].FileSize) && (Files[fs1].FileChangeTime == Files[fs2].FileChangeTime))
                                     {
                                         fss.FileState = "0";
 
