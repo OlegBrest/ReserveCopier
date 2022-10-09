@@ -15,9 +15,11 @@ namespace ReserveCopier
     public partial class MainReservCopyer : Form
     {
         int TotalDirs = 0;
-        int TotalFiles = 0;
+        static int TotalFiles = 0;
         double TotalSize = 0;
         int log_rows = 0;
+        static int currThreads = 0; // количество потоков для многопоточки
+
         public struct LogStr
         {
             public DateTime dtstr { get; set; }
@@ -41,7 +43,7 @@ namespace ReserveCopier
         Thread trdfilecopy; // поток копирования файлов
         string current_path = "";
         double speedMbs = 0; // Скорость метров в сек
-        double speedFils = 0; // Скорость файлов в сек
+        double speedFiles = 0; // Скорость файлов в сек
 
         int ProgressValue = 0;
         string MainFileName = "";
@@ -423,7 +425,7 @@ namespace ReserveCopier
         }
         private void updateSpeedLabel()
         {
-            SpeedLabel.Text = String.Format("{0:N2} Мб/с, {1:N2} Ф/с", speedMbs, speedFils);
+            SpeedLabel.Text = String.Format("{0:N2} Мб/с, {1:N2} Ф/с", speedMbs, speedFiles);
             SpeedLabel.Update();
         }
         private void updatePathTxtBx()
@@ -693,7 +695,7 @@ namespace ReserveCopier
                     CopyFromDataFileToDisk(mainFiledata, true, modeint);
                     TimeSpan CopyTime = (DateTime.Now - startCopyTime);
                     //dtLog.Rows.Add(DateTime.Now, "595.Скопированы основные файлы." + mainFiledata.Count + " файлов");
-                    logg("757.Скопированы основные файлы." + mainFiledata.Count + " файлов за "+ CopyTime.TotalSeconds+" сек.");
+                    logg("757.Скопированы основные файлы." + mainFiledata.Count + " файлов за " + CopyTime.TotalSeconds + " сек.");
                     //InterfaceUpdateTimer_Tick();
                     Properties.Settings.Default.LastFullTime = DateTime.Now;
                     Properties.Settings.Default.Save();
@@ -721,7 +723,7 @@ namespace ReserveCopier
                     double lastsize = 0;
                     int lastFiles = TotalFiles;
                     speedMbs = 0;
-                    speedFils = 0;
+                    speedFiles = 0;
                     //dtLog.Rows.Add(DateTime.Now, "621.Копирую файлы отличия.");
 
                     //InterfaceUpdateTimer_Tick();
@@ -806,7 +808,7 @@ namespace ReserveCopier
                         if (ts.TotalSeconds > 2)
                         {
                             speedMbs = (((currsize - lastsize) / (1024 * 1024)) / ts.TotalMilliseconds) * 1000;
-                            speedFils = (lastFiles - TotalFiles) / ts.TotalSeconds;
+                            speedFiles = (lastFiles - TotalFiles) / ts.TotalSeconds;
                             starttime = DateTime.Now;
                             lastsize = currsize;
                             lastFiles = TotalFiles;
@@ -835,151 +837,44 @@ namespace ReserveCopier
 
         private void CopyFromDataFileToDisk(FileData df, bool isMain = true, int modeint = 1)
         {
-            long currsize = 0;
             DateTime starttime = DateTime.Now;
+            TotalFiles = df.Files.Count;
             int speedfiles = TotalFiles;
             double speedSize = TotalSize;
             double previoussize = 0;
             int previousFiles = TotalFiles;
             speedMbs = 0;
-            speedFils = 0;
-            int maxThreads = 5;
-            int currThreads = 0;
+            speedFiles = 0;
+            int maxThreads = 10;
             
+
             logg("849.Приступаю к копированию файлов. Итого " + speedfiles + " файлов");
             if (Properties.Settings.Default.ParallelCopy)
             {
                 logg("852.режим параллельного копирования");
+                //int flscnt = df.Count;
                 Parallel.ForEach(df.Files, fs =>
                 {
-                    while (currThreads > maxThreads) Thread.Sleep(10);
+                    //while (currThreads > maxThreads) Thread.Sleep(10);
                     currThreads++;
-                    if (File.Exists(fs.FileFullName) && ((!isMain && !fs.FileState.Equals("d")) || isMain))
-                    {
-                        FileInfo fi = new FileInfo(fs.FileFullName);
-                        currsize += fi.Length;
-                        string filename = fi.Name;
-                        string savefilename = MainFilePath + (fs.FileFullName.Replace(":", ""));
-                        string savingpath = savefilename.Substring(0, savefilename.Length - filename.Length);
-                        if (!Directory.Exists(savingpath)) Directory.CreateDirectory(savingpath);
-                        try
-                        {
-                            if ((fs.FileFullName.Length < 32767) && (savefilename.Length < 32767))
-                            {
-                                File.Copy(fs.FileFullName, savefilename, true);
-                                current_path = fs.FileFullName;
-                            }
-                            else
-                            {
-                                logg("855.Ошибка : Слишком длинный путь " + ((fs.FileFullName.Length < 32767) ? savefilename : fs.FileFullName));
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            logg("898.Ошибка : " + ex.Message);
-                        }
-                        finally
-                        {
-                            TotalFiles--;
-                        }
-
-                        if (!isMain)
-                        {
-                            // так же скопируем в главную папку добавленное
-                            if (fs.FileState.Equals("i") && modeint == 1)
-                            {
-                                savefilename = MainFilePath + (fs.FileFullName.Replace(":", ""));
-                                savingpath = savefilename.Substring(0, savefilename.Length - filename.Length);
-                                if (!Directory.Exists(savingpath)) Directory.CreateDirectory(savingpath);
-                                try
-                                {
-                                    if ((fs.FileFullName.Length < 32767) && (savefilename.Length < 32767))
-                                    {
-                                        File.Copy(fs.FileFullName, savefilename, true);
-                                        current_path = fs.FileFullName;
-                                    }
-                                    else
-                                    {
-                                        logg("855.Ошибка : Слишком длинный путь " + ((fs.FileFullName.Length < 32767) ? savefilename : fs.FileFullName));
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    //dtLog.Rows.Add(DateTime.Now, "645.Ошибка добавления в полную копию : " + ex.Message);
-                                    logg("864.Ошибка добавления в полную копию : " + ex.Message);
-                                    //InterfaceUpdateTimer_Tick();
-                                }
-                                finally
-                                {
-                                    TotalFiles--;
-                                }
-                            }
-                            // скопируем удалённое из резерва
-                            if (fs.FileState.Equals("d"))
-                            {
-                                string reservFileName = MainFilePath + (fs.FileFullName.Replace(":", ""));
-                                if (File.Exists(reservFileName))
-                                {
-                                    fi = new FileInfo(reservFileName);
-                                    filename = fi.Name;
-                                    savefilename = DiffFilePath + (fs.FileFullName.Replace(":", ""));
-                                    savingpath = savefilename.Replace(filename, "");
-                                    if (!Directory.Exists(savingpath)) Directory.CreateDirectory(savingpath);
-                                    try
-                                    {
-                                        if ((reservFileName.Length < 32767) && (savefilename.Length < 32767))
-                                        {
-                                            File.Copy(reservFileName, savefilename, true);
-                                            current_path = reservFileName;
-                                        }
-                                        else
-                                        {
-                                            logg("855.Ошибка : Слишком длинный путь " + ((reservFileName.Length < 32767) ? savefilename : fs.FileFullName));
-                                        }
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        //dtLog.Rows.Add(DateTime.Now, "629.Ошибка : " + ex.Message);
-                                        logg("889.Ошибка : " + ex.Message);
-                                        //InterfaceUpdateTimer_Tick();
-                                    }
-                                    finally
-                                    {
-                                        TotalFiles--;
-                                    }
-
-                                    currsize += fi.Length;
-                                    //ProgressValue = (int)(((currsize / speedSize) * 100) + 0.5);
-                                    //TotalSize = speedSize - currsize;
-                                    //if (TotalSize < 0) TotalSize = 0;
-                                    //InterfaceUpdateTimer_Tick();
-                                }
-                            }
-
-                        }
-
-                        ProgressValue = (int)(((currsize / speedSize) * 100) + 0.5);
-                        TotalSize = speedSize - currsize;
-                        if (TotalSize < 0) TotalSize = 0;
-                    }
-                    else if (fs.Type == "DIR")
-                    {
-                        string savedirname = MainFilePath + (fs.FileFullName.Replace(":", ""));
-                        if (!Directory.Exists(savedirname)) Directory.CreateDirectory(savedirname);
-                    }
-
+                    CopyFile(fs, isMain, modeint);
                     TimeSpan ts = (DateTime.Now - starttime);
                     if (ts.TotalSeconds > 2)
                     {
-                        speedMbs = (speedMbs + (((currsize - previoussize) / (1024 * 1024)) / ts.TotalMilliseconds) * 1000) / 2;
-                        speedFils = (speedFils + (previousFiles - TotalFiles) / ts.TotalSeconds) / 2;
+                        ProgressValue = (int)((((speedSize-TotalSize) / speedSize) * 100) + 0.5);
+                        if (TotalSize < 0) TotalSize = 0;
+                        speedMbs = (speedMbs + (((double)(previoussize - TotalSize) / (1024 * 1024)) / ts.TotalMilliseconds) * 1000) / 2;
+                        if (speedMbs < 0) speedMbs = 0;
+                        speedFiles = (speedFiles + (previousFiles - TotalFiles) / ts.TotalSeconds) / 2;
+                        if (speedFiles < 0) speedFiles = 0;
                         starttime = DateTime.Now;
-                        previoussize = currsize;
+                        previoussize = TotalSize;
                         previousFiles = TotalFiles;
                         //InterfaceUpdateTimer_Tick();
                     }
                     currThreads--;
                 });
+                //while (currThreads > 0) Thread.Sleep(10);
             }
             else
             {
@@ -988,19 +883,73 @@ namespace ReserveCopier
                 {
                     while (currThreads > maxThreads) Thread.Sleep(10);
                     currThreads++;
-                    if (File.Exists(fs.FileFullName) && ((!isMain && !fs.FileState.Equals("d")) || isMain))
+                    CopyFile(fs, isMain, modeint);
+
+                    TimeSpan ts = (DateTime.Now - starttime);
+                    if (ts.TotalSeconds > 2)
                     {
-                        FileInfo fi = new FileInfo(fs.FileFullName);
-                        currsize += fi.Length;
-                        string filename = fi.Name;
-                        string savefilename = MainFilePath + (fs.FileFullName.Replace(":", ""));
-                        string savingpath = savefilename.Substring(0, savefilename.Length - filename.Length);
-                        if (!Directory.Exists(savingpath)) Directory.CreateDirectory(savingpath);
-                        try
+                        ProgressValue = (int)((((speedSize - TotalSize) / speedSize) * 100) + 0.5);
+                        if (TotalSize < 0) TotalSize = 0;
+                        speedMbs = (speedMbs + (((double)(previoussize-TotalSize) / (1024 * 1024)) / ts.TotalMilliseconds) * 1000) / 2;
+                        if (speedMbs < 0) speedMbs = 0;
+                        speedFiles = (speedFiles + (previousFiles - TotalFiles) / ts.TotalSeconds) / 2;
+                        if (speedFiles < 0) speedFiles = 0;
+                        starttime = DateTime.Now;
+                        previoussize = TotalSize;
+                        previousFiles = TotalFiles;
+                        //InterfaceUpdateTimer_Tick();
+                    }
+                    currThreads--;
+                }
+            }
+            //currsize = (long)speedSize;
+            //previousFiles = TotalFiles;
+            TimeSpan endts = (DateTime.Now - starttime);
+            ProgressValue = 100;
+            if (TotalSize < 0) TotalSize = 0;
+            speedMbs = 0;
+            speedFiles = 0;
+            starttime = DateTime.Now;
+        }
+
+        private void CopyFile(FileData.FileStruct fs, bool isMain, int modeint)
+        {
+            try
+            {
+                if (File.Exists(fs.FileFullName) && ((!isMain && !fs.FileState.Equals("d")) || isMain))
+                {
+                    FileInfo fi = new FileInfo(fs.FileFullName);
+                    TotalSize = (TotalSize-fi.Length);
+                    string filename = fi.Name;
+                    string savefilename = MainFilePath + (fs.FileFullName.Replace(":", ""));
+                    string savingpath = savefilename.Substring(0, savefilename.Length - filename.Length);
+                    if (!Directory.Exists(savingpath)) Directory.CreateDirectory(savingpath);
+                    try
+                    {
+                        if ((fs.FileFullName.Length < 32767) && (savefilename.Length < 32767))
                         {
-                            FileInfo fo = new FileInfo(savefilename);
-                            if (!fo.Exists || ((fi.Length != fo.Length) && (fi.LastWriteTime != fo.LastWriteTime)))
-                                {
+                            File.Copy(fs.FileFullName, savefilename, true);
+                            current_path = fs.FileFullName;
+                        }
+                        else
+                        {
+                            logg("855.Ошибка : Слишком длинный путь " + ((fs.FileFullName.Length < 32767) ? savefilename : fs.FileFullName));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        logg("898.Ошибка : " + ex.Message);
+                    }
+                    if (!isMain)
+                    {
+                        // так же скопируем в главную папку добавленное
+                        if (fs.FileState.Equals("i") && modeint == 1)
+                        {
+                            savefilename = MainFilePath + (fs.FileFullName.Replace(":", ""));
+                            savingpath = savefilename.Substring(0, savefilename.Length - filename.Length);
+                            if (!Directory.Exists(savingpath)) Directory.CreateDirectory(savingpath);
+                            try
+                            {
                                 if ((fs.FileFullName.Length < 32767) && (savefilename.Length < 32767))
                                 {
                                     File.Copy(fs.FileFullName, savefilename, true);
@@ -1011,132 +960,77 @@ namespace ReserveCopier
                                     logg("855.Ошибка : Слишком длинный путь " + ((fs.FileFullName.Length < 32767) ? savefilename : fs.FileFullName));
                                 }
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            logg("898.Ошибка : " + ex.Message);
-                        }
-                        finally
-                        {
-                            TotalFiles--;
-                        }
-
-                        if (!isMain)
-                        {
-                            // так же скопируем в главную папку добавленное
-                            if (fs.FileState.Equals("i") && modeint == 1)
+                            catch (Exception ex)
                             {
-                                savefilename = MainFilePath + (fs.FileFullName.Replace(":", ""));
-                                savingpath = savefilename.Substring(0, savefilename.Length - filename.Length);
+                                //dtLog.Rows.Add(DateTime.Now, "645.Ошибка добавления в полную копию : " + ex.Message);
+                                logg("864.Ошибка добавления в полную копию : " + ex.Message);
+                                //InterfaceUpdateTimer_Tick();
+                            }
+                            finally
+                            {
+                                TotalFiles--;
+                            }
+                        }
+                        // скопируем удалённое из резерва
+                        if (fs.FileState.Equals("d"))
+                        {
+                            string reservFileName = MainFilePath + (fs.FileFullName.Replace(":", ""));
+                            if (File.Exists(reservFileName))
+                            {
+                                fi = new FileInfo(reservFileName);
+                                filename = fi.Name;
+                                savefilename = DiffFilePath + (fs.FileFullName.Replace(":", ""));
+                                savingpath = savefilename.Replace(filename, "");
                                 if (!Directory.Exists(savingpath)) Directory.CreateDirectory(savingpath);
                                 try
                                 {
-                                    FileInfo fo = new FileInfo(savefilename);
-                                    if (!fo.Exists || ((fi.Length != fo.Length) && (fi.LastWriteTime != fo.LastWriteTime)))
+                                    if ((reservFileName.Length < 32767) && (savefilename.Length < 32767))
                                     {
-                                        if ((fs.FileFullName.Length < 32767) && (savefilename.Length < 32767))
-                                        {
-                                            File.Copy(fs.FileFullName, savefilename, true);
-                                            current_path = fs.FileFullName;
-                                        }
-                                        else
-                                        {
-                                            logg("855.Ошибка : Слишком длинный путь " + ((fs.FileFullName.Length < 32767) ? savefilename : fs.FileFullName));
-                                        }
+                                        File.Copy(reservFileName, savefilename, true);
+                                        current_path = reservFileName;
+                                    }
+                                    else
+                                    {
+                                        logg("855.Ошибка : Слишком длинный путь " + ((reservFileName.Length < 32767) ? savefilename : fs.FileFullName));
                                     }
                                 }
                                 catch (Exception ex)
                                 {
-                                    //dtLog.Rows.Add(DateTime.Now, "645.Ошибка добавления в полную копию : " + ex.Message);
-                                    logg("864.Ошибка добавления в полную копию : " + ex.Message);
+                                    //dtLog.Rows.Add(DateTime.Now, "629.Ошибка : " + ex.Message);
+                                    logg("889.Ошибка : " + ex.Message);
                                     //InterfaceUpdateTimer_Tick();
                                 }
                                 finally
                                 {
                                     TotalFiles--;
                                 }
+
+                                //ProgressValue = (int)(((currsize / speedSize) * 100) + 0.5);
+                                //TotalSize = speedSize - currsize;
+                                //if (TotalSize < 0) TotalSize = 0;
+                                //InterfaceUpdateTimer_Tick();
                             }
-                            // скопируем удалённое из резерва
-                            if (fs.FileState.Equals("d"))
-                            {
-                                string reservFileName = MainFilePath + (fs.FileFullName.Replace(":", ""));
-                                if (File.Exists(reservFileName))
-                                {
-                                    fi = new FileInfo(reservFileName);
-                                    filename = fi.Name;
-                                    savefilename = DiffFilePath + (fs.FileFullName.Replace(":", ""));
-                                    savingpath = savefilename.Replace(filename, "");
-                                    if (!Directory.Exists(savingpath)) Directory.CreateDirectory(savingpath);
-
-                                    try
-                                    {
-                                        FileInfo fo = new FileInfo(savefilename);
-                                        if (!fo.Exists || ((fi.Length != fo.Length) && (fi.LastWriteTime != fo.LastWriteTime)))
-                                        {
-                                            if ((reservFileName.Length < 32767) && (savefilename.Length < 32767))
-                                            {
-                                                File.Copy(reservFileName, savefilename, true);
-                                                current_path = reservFileName;
-                                            }
-                                            else
-                                            {
-                                                logg("855.Ошибка : Слишком длинный путь " + ((reservFileName.Length < 32767) ? savefilename : fs.FileFullName));
-                                            }
-                                        }
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        //dtLog.Rows.Add(DateTime.Now, "629.Ошибка : " + ex.Message);
-                                        logg("889.Ошибка : " + ex.Message);
-                                        //InterfaceUpdateTimer_Tick();
-                                    }
-                                    finally
-                                    {
-                                        TotalFiles--;
-                                    }
-
-                                    currsize += fi.Length;
-                                    //ProgressValue = (int)(((currsize / speedSize) * 100) + 0.5);
-                                    //TotalSize = speedSize - currsize;
-                                    //if (TotalSize < 0) TotalSize = 0;
-                                    //InterfaceUpdateTimer_Tick();
-                                }
-                            }
-
                         }
 
-                        ProgressValue = (int)(((currsize / speedSize) * 100) + 0.5);
-                        TotalSize = speedSize - currsize;
-                        if (TotalSize < 0) TotalSize = 0;
                     }
-                    else if (fs.Type == "DIR")
-                    {
-                        string savedirname = MainFilePath + (fs.FileFullName.Replace(":", ""));
-                        if (!Directory.Exists(savedirname)) Directory.CreateDirectory(savedirname);
-                    }
-
-                    TimeSpan ts = (DateTime.Now - starttime);
-                    if (ts.TotalSeconds > 2)
-                    {
-                        ProgressValue = (int)(((currsize / speedSize) * 100) + 0.5);
-                        TotalSize = speedSize - currsize;
-                        if (TotalSize < 0) TotalSize = 0;
-                        speedMbs = (speedMbs + (((currsize - previoussize) / (1024 * 1024)) / ts.TotalMilliseconds) * 1000) / 2;
-                        speedFils = (speedFils + (previousFiles - TotalFiles) / ts.TotalSeconds) / 2;
-                        starttime = DateTime.Now;
-                        previoussize = currsize;
-                        previousFiles = TotalFiles;
-                        //InterfaceUpdateTimer_Tick();
-                    }
-                    currThreads--;
+                }
+                else if (fs.Type == "DIR")
+                {
+                    string savedirname = MainFilePath + (fs.FileFullName.Replace(":", ""));
+                    if (!Directory.Exists(savedirname)) Directory.CreateDirectory(savedirname);
                 }
             }
-            currsize = (long) speedSize;
-            previousFiles = TotalFiles;
-            ProgressValue = (int)(((currsize / speedSize) * 100) + 0.5);
-            TotalSize = speedSize - currsize;
-            if (TotalSize < 0) TotalSize = 0;
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                TotalFiles--;
+            }
         }
+
+
         private void autostart_chkbx_CheckedChanged(object sender, EventArgs e)
         {
             //autostart = false;

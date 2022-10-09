@@ -1,26 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ReserveCopier
 {
-    class FileData
+    class FileData 
     {
         public int Count = 0;
         public bool _isBusy = false;
         public string NameMethod = "";
 
-        public struct FileStruct
+        public struct FileStruct : IComparable<FileStruct> 
         {
             public string Type; // FILE , DIR
             public string FileFullName;
             public long FileSize;
             public long FileChangeTime;
             public string FileState; // d удалён , i добавлен , m изменен
+
+            int IComparable<FileStruct>.CompareTo(FileStruct x)
+            {
+                int retval = 0;
+                retval = StringComparer.Ordinal.Compare(x.FileFullName, FileFullName);
+                if (retval == 0) retval = (int) (x.FileSize - FileSize);
+                if (retval == 0) retval = (int)(x.FileChangeTime - FileChangeTime);
+                return retval;
+            }
         }
+
         //public FileStruct[] Files;
         public List<FileStruct> Files;
 
@@ -30,6 +41,7 @@ namespace ReserveCopier
             Files = new List<FileStruct>();
             Count = 0;
         }
+
 
         public void InsertFromDT(DataTable dt)
         {
@@ -150,6 +162,8 @@ namespace ReserveCopier
         {
             isBusy();
             bool result = true;
+            if (Files.Count > 0) Files.Sort();
+            if (fd.Files.Count>0) fd.Files.Sort();
             if (!_isBusy)
             {
                 _isBusy = true;
@@ -168,8 +182,28 @@ namespace ReserveCopier
                             fss.FileFullName = fs.FileFullName;
                             fss.FileSize = fs.FileSize;
                             fss.FileChangeTime = fs.FileChangeTime;
-                            fss.FileState = state;
-                            Files.Add(fss);
+                            fss.FileState = "d";
+                            int finder = -1;
+                            if (state == "i")
+                            {
+                                try
+                                {
+                                    finder = Files.BinarySearch(fss);
+                                }
+                                catch (Exception ex)
+                                {
+                                    MessageBox.Show(ex.Message);
+                                }
+                            }
+                            if (finder > -1)
+                            {
+                                Files.RemoveAt(finder);
+                            }
+                            else
+                            {
+                                fss.FileState = state;
+                                Files.Add(fss);
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -305,7 +339,7 @@ namespace ReserveCopier
                 {
                     try
                     {
-                        inpArray[i] = Files[i].Type + "|"+Files[i].FileFullName + "|" + Files[i].FileSize + "|" + Files[i].FileChangeTime + "|" + Files[i].FileState;
+                        inpArray[i] = Files[i].Type + "|" + Files[i].FileFullName + "|" + Files[i].FileSize + "|" + Files[i].FileChangeTime + "|" + Files[i].FileState;
                     }
                     catch (Exception ex)
                     {
@@ -331,7 +365,7 @@ namespace ReserveCopier
             }
         }
 
-        public void AddRow(string Type,string FileFullName, long FileSize, long FileChangeTime, string FileState = "")
+        public void AddRow(string Type, string FileFullName, long FileSize, long FileChangeTime, string FileState = "")
         {
             isBusy();
             if (!_isBusy)
@@ -386,11 +420,12 @@ namespace ReserveCopier
                 //for (int fs1 = 0; fs1 < Count; fs1++)
                 Parallel.For(0, Count, fs1 =>
                 {
-                    if ((Files[fs1].FileState!="m") && (Files[fs1].FileState!="0"))
+                    if ((Files[fs1].FileState != "m") && (Files[fs1].FileState != "0"))
                     {
-                        for (int fs2 = (Count - 1); fs2 > fs1; fs2--)
+                        //for (int fs2 = (Count - 1); fs2 > fs1; fs2--)
+                        for (int fs2 = fs1+1; fs2 < Count; fs2++)
                         {
-                            if ((Files[fs1].FileFullName != null) && (Files[fs2].FileFullName != null) && ((Files[fs2].FileState!="m") && (Files[fs2].FileState!="0"))) 
+                            if ((Files[fs1].FileFullName != null) && (Files[fs2].FileFullName != null) && ((Files[fs2].FileState != "m") && (Files[fs2].FileState != "0")))
                             {
                                 if (Files[fs1].FileFullName == Files[fs2].FileFullName)
                                 {
@@ -403,10 +438,11 @@ namespace ReserveCopier
                                     if ((Files[fs1].FileSize == Files[fs2].FileSize) && (Files[fs1].FileChangeTime == Files[fs2].FileChangeTime))
                                     {
                                         fss.FileState = "0";
-
                                         Files[fs1] = fss;
                                         Files[fs2] = fss;
                                         _delcnt += 2;
+                                        fs2 = fs1;
+                                        
                                     }
                                     else
                                     {
@@ -415,6 +451,7 @@ namespace ReserveCopier
                                         fss.FileState = "0";
                                         Files[fs2] = fss;
                                         _delcnt++;
+                                        fs2 = fs1;
                                     }
                                     break;
                                 }
@@ -440,7 +477,7 @@ namespace ReserveCopier
                      _fs.CopyTo(Files, 0);
                      _fs = null;*/
                     //foreach (FileStruct fs in Files)
-                    for (int i = (Count-1); i >= 0; i--)
+                    for (int i = (Count - 1); i >= 0; i--)
                     {
                         FileStruct fs = Files[i];
 
@@ -486,5 +523,6 @@ namespace ReserveCopier
              }*/
             return;
         }
+
     }
 }
