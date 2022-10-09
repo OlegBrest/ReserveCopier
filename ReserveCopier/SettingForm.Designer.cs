@@ -29,9 +29,16 @@
         private void InitializeComponent()
         {
             this.MainSettingPanel = new System.Windows.Forms.Panel();
+            this.autoscroll_logDGV = new System.Windows.Forms.CheckBox();
+            this.minuts_numericUpDown = new System.Windows.Forms.NumericUpDown();
+            this.hours_numericUpDown = new System.Windows.Forms.NumericUpDown();
             this.Days_checkedListBox = new System.Windows.Forms.CheckedListBox();
+            this.fullcopy_Combobox = new System.Windows.Forms.ComboBox();
+            this.Mode_Combobox = new System.Windows.Forms.ComboBox();
             this.cancel_bttn = new System.Windows.Forms.Button();
             this.ok_bttn = new System.Windows.Forms.Button();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
@@ -39,19 +46,13 @@
             this.label2 = new System.Windows.Forms.Label();
             this.OutPathBttn = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
+            this.outpathTxtbx = new System.Windows.Forms.TextBox();
             this.DeletePathBttn = new System.Windows.Forms.Button();
             this.EditPathBttn = new System.Windows.Forms.Button();
             this.InputPathLstBX = new System.Windows.Forms.CheckedListBox();
             this.AddPathBttn = new System.Windows.Forms.Button();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.autoscroll_logDGV = new System.Windows.Forms.CheckBox();
-            this.minuts_numericUpDown = new System.Windows.Forms.NumericUpDown();
-            this.hours_numericUpDown = new System.Windows.Forms.NumericUpDown();
-            this.fullcopy_Combobox = new System.Windows.Forms.ComboBox();
-            this.Mode_Combobox = new System.Windows.Forms.ComboBox();
-            this.outpathTxtbx = new System.Windows.Forms.TextBox();
+            this.ParallelCopy_Checkbox = new System.Windows.Forms.CheckBox();
             this.MainSettingPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.minuts_numericUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.hours_numericUpDown)).BeginInit();
@@ -59,6 +60,7 @@
             // 
             // MainSettingPanel
             // 
+            this.MainSettingPanel.Controls.Add(this.ParallelCopy_Checkbox);
             this.MainSettingPanel.Controls.Add(this.autoscroll_logDGV);
             this.MainSettingPanel.Controls.Add(this.minuts_numericUpDown);
             this.MainSettingPanel.Controls.Add(this.hours_numericUpDown);
@@ -84,8 +86,60 @@
             this.MainSettingPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.MainSettingPanel.Location = new System.Drawing.Point(0, 0);
             this.MainSettingPanel.Name = "MainSettingPanel";
-            this.MainSettingPanel.Size = new System.Drawing.Size(832, 567);
+            this.MainSettingPanel.Size = new System.Drawing.Size(832, 566);
             this.MainSettingPanel.TabIndex = 0;
+            // 
+            // autoscroll_logDGV
+            // 
+            this.autoscroll_logDGV.AutoSize = true;
+            this.autoscroll_logDGV.Checked = global::ReserveCopier.Properties.Settings.Default.AutoScroolLog;
+            this.autoscroll_logDGV.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::ReserveCopier.Properties.Settings.Default, "AutoScroolLog", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.autoscroll_logDGV.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.autoscroll_logDGV.Location = new System.Drawing.Point(406, 434);
+            this.autoscroll_logDGV.Name = "autoscroll_logDGV";
+            this.autoscroll_logDGV.Size = new System.Drawing.Size(180, 24);
+            this.autoscroll_logDGV.TabIndex = 13;
+            this.autoscroll_logDGV.Text = "автопрокрутка лога";
+            this.autoscroll_logDGV.UseVisualStyleBackColor = true;
+            // 
+            // minuts_numericUpDown
+            // 
+            this.minuts_numericUpDown.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::ReserveCopier.Properties.Settings.Default, "PeriodicMinutes", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.minuts_numericUpDown.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.minuts_numericUpDown.Location = new System.Drawing.Point(601, 337);
+            this.minuts_numericUpDown.Maximum = new decimal(new int[] {
+            59,
+            0,
+            0,
+            0});
+            this.minuts_numericUpDown.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.minuts_numericUpDown.Name = "minuts_numericUpDown";
+            this.minuts_numericUpDown.Size = new System.Drawing.Size(53, 26);
+            this.minuts_numericUpDown.TabIndex = 11;
+            this.minuts_numericUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.minuts_numericUpDown.Value = global::ReserveCopier.Properties.Settings.Default.PeriodicMinutes;
+            this.minuts_numericUpDown.ValueChanged += new System.EventHandler(this.hours_numericUpDown_ValueChanged);
+            // 
+            // hours_numericUpDown
+            // 
+            this.hours_numericUpDown.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::ReserveCopier.Properties.Settings.Default, "periodicHours", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.hours_numericUpDown.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.hours_numericUpDown.Location = new System.Drawing.Point(601, 305);
+            this.hours_numericUpDown.Maximum = new decimal(new int[] {
+            23,
+            0,
+            0,
+            0});
+            this.hours_numericUpDown.Name = "hours_numericUpDown";
+            this.hours_numericUpDown.Size = new System.Drawing.Size(53, 26);
+            this.hours_numericUpDown.TabIndex = 11;
+            this.hours_numericUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.hours_numericUpDown.Value = global::ReserveCopier.Properties.Settings.Default.periodicHours;
+            this.hours_numericUpDown.ValueChanged += new System.EventHandler(this.hours_numericUpDown_ValueChanged);
             // 
             // Days_checkedListBox
             // 
@@ -104,6 +158,40 @@
             this.Days_checkedListBox.Name = "Days_checkedListBox";
             this.Days_checkedListBox.Size = new System.Drawing.Size(184, 151);
             this.Days_checkedListBox.TabIndex = 10;
+            // 
+            // fullcopy_Combobox
+            // 
+            this.fullcopy_Combobox.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::ReserveCopier.Properties.Settings.Default, "FullCopyPeriodic", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.fullcopy_Combobox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.fullcopy_Combobox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.fullcopy_Combobox.FormattingEnabled = true;
+            this.fullcopy_Combobox.Items.AddRange(new object[] {
+            "Ежедневно",
+            "Еженедельно",
+            "Ежемесячно",
+            "Ежегодно"});
+            this.fullcopy_Combobox.Location = new System.Drawing.Point(406, 205);
+            this.fullcopy_Combobox.Name = "fullcopy_Combobox";
+            this.fullcopy_Combobox.Size = new System.Drawing.Size(414, 28);
+            this.fullcopy_Combobox.TabIndex = 9;
+            this.fullcopy_Combobox.Text = global::ReserveCopier.Properties.Settings.Default.FullCopyPeriodic;
+            // 
+            // Mode_Combobox
+            // 
+            this.Mode_Combobox.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::ReserveCopier.Properties.Settings.Default, "CopyModeValue", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.Mode_Combobox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Mode_Combobox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.Mode_Combobox.FormattingEnabled = true;
+            this.Mode_Combobox.Items.AddRange(new object[] {
+            "Полное",
+            "Разностное относительно первой копии",
+            "Разностное относительно последней копии"});
+            this.Mode_Combobox.Location = new System.Drawing.Point(406, 128);
+            this.Mode_Combobox.Name = "Mode_Combobox";
+            this.Mode_Combobox.Size = new System.Drawing.Size(414, 28);
+            this.Mode_Combobox.TabIndex = 9;
+            this.Mode_Combobox.Text = global::ReserveCopier.Properties.Settings.Default.CopyModeValue;
+            this.Mode_Combobox.TextChanged += new System.EventHandler(this.Mode_Combobox_TextChanged);
             // 
             // cancel_bttn
             // 
@@ -124,6 +212,26 @@
             this.ok_bttn.Text = "OK";
             this.ok_bttn.UseVisualStyleBackColor = true;
             this.ok_bttn.Click += new System.EventHandler(this.ok_bttn_Click);
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label8.Location = new System.Drawing.Point(654, 335);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(72, 25);
+            this.label8.TabIndex = 5;
+            this.label8.Text = "минут";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label7.Location = new System.Drawing.Point(660, 335);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(69, 25);
+            this.label7.TabIndex = 5;
+            this.label7.Text = "часов";
             // 
             // label6
             // 
@@ -196,6 +304,16 @@
             this.label1.TabIndex = 5;
             this.label1.Text = "Путь для сохранения";
             // 
+            // outpathTxtbx
+            // 
+            this.outpathTxtbx.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::ReserveCopier.Properties.Settings.Default, "OutputPath", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.outpathTxtbx.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.outpathTxtbx.Location = new System.Drawing.Point(406, 40);
+            this.outpathTxtbx.Name = "outpathTxtbx";
+            this.outpathTxtbx.Size = new System.Drawing.Size(414, 26);
+            this.outpathTxtbx.TabIndex = 4;
+            this.outpathTxtbx.Text = global::ReserveCopier.Properties.Settings.Default.OutputPath;
+            // 
             // DeletePathBttn
             // 
             this.DeletePathBttn.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
@@ -243,128 +361,25 @@
             // 
             this.folderBrowserDialog.RootFolder = System.Environment.SpecialFolder.MyComputer;
             // 
-            // label7
+            // ParallelCopy_Checkbox
             // 
-            this.label7.AutoSize = true;
-            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label7.Location = new System.Drawing.Point(660, 335);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(69, 25);
-            this.label7.TabIndex = 5;
-            this.label7.Text = "часов";
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label8.Location = new System.Drawing.Point(654, 335);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(72, 25);
-            this.label8.TabIndex = 5;
-            this.label8.Text = "минут";
-            // 
-            // autoscroll_logDGV
-            // 
-            this.autoscroll_logDGV.AutoSize = true;
-            this.autoscroll_logDGV.Checked = global::ReserveCopier.Properties.Settings.Default.AutoScroolLog;
-            this.autoscroll_logDGV.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::ReserveCopier.Properties.Settings.Default, "AutoScroolLog", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.autoscroll_logDGV.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.autoscroll_logDGV.Location = new System.Drawing.Point(406, 434);
-            this.autoscroll_logDGV.Name = "autoscroll_logDGV";
-            this.autoscroll_logDGV.Size = new System.Drawing.Size(180, 24);
-            this.autoscroll_logDGV.TabIndex = 13;
-            this.autoscroll_logDGV.Text = "автопрокрутка лога";
-            this.autoscroll_logDGV.UseVisualStyleBackColor = true;
-            // 
-            // minuts_numericUpDown
-            // 
-            this.minuts_numericUpDown.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::ReserveCopier.Properties.Settings.Default, "PeriodicMinutes", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.minuts_numericUpDown.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.minuts_numericUpDown.Location = new System.Drawing.Point(601, 337);
-            this.minuts_numericUpDown.Maximum = new decimal(new int[] {
-            59,
-            0,
-            0,
-            0});
-            this.minuts_numericUpDown.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.minuts_numericUpDown.Name = "minuts_numericUpDown";
-            this.minuts_numericUpDown.Size = new System.Drawing.Size(53, 26);
-            this.minuts_numericUpDown.TabIndex = 11;
-            this.minuts_numericUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.minuts_numericUpDown.Value = global::ReserveCopier.Properties.Settings.Default.PeriodicMinutes;
-            this.minuts_numericUpDown.ValueChanged += new System.EventHandler(this.hours_numericUpDown_ValueChanged);
-            // 
-            // hours_numericUpDown
-            // 
-            this.hours_numericUpDown.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::ReserveCopier.Properties.Settings.Default, "periodicHours", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.hours_numericUpDown.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.hours_numericUpDown.Location = new System.Drawing.Point(601, 305);
-            this.hours_numericUpDown.Maximum = new decimal(new int[] {
-            23,
-            0,
-            0,
-            0});
-            this.hours_numericUpDown.Name = "hours_numericUpDown";
-            this.hours_numericUpDown.Size = new System.Drawing.Size(53, 26);
-            this.hours_numericUpDown.TabIndex = 11;
-            this.hours_numericUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.hours_numericUpDown.Value = global::ReserveCopier.Properties.Settings.Default.periodicHours;
-            this.hours_numericUpDown.ValueChanged += new System.EventHandler(this.hours_numericUpDown_ValueChanged);
-            // 
-            // fullcopy_Combobox
-            // 
-            this.fullcopy_Combobox.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::ReserveCopier.Properties.Settings.Default, "FullCopyPeriodic", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.fullcopy_Combobox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.fullcopy_Combobox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.fullcopy_Combobox.FormattingEnabled = true;
-            this.fullcopy_Combobox.Items.AddRange(new object[] {
-            "Ежедневно",
-            "Еженедельно",
-            "Ежемесячно",
-            "Ежегодно"});
-            this.fullcopy_Combobox.Location = new System.Drawing.Point(406, 205);
-            this.fullcopy_Combobox.Name = "fullcopy_Combobox";
-            this.fullcopy_Combobox.Size = new System.Drawing.Size(414, 28);
-            this.fullcopy_Combobox.TabIndex = 9;
-            this.fullcopy_Combobox.Text = global::ReserveCopier.Properties.Settings.Default.FullCopyPeriodic;
-            // 
-            // Mode_Combobox
-            // 
-            this.Mode_Combobox.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::ReserveCopier.Properties.Settings.Default, "CopyModeValue", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.Mode_Combobox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.Mode_Combobox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.Mode_Combobox.FormattingEnabled = true;
-            this.Mode_Combobox.Items.AddRange(new object[] {
-            "Полное",
-            "Разностное относительно первой копии",
-            "Разностное относительно последней копии"});
-            this.Mode_Combobox.Location = new System.Drawing.Point(406, 128);
-            this.Mode_Combobox.Name = "Mode_Combobox";
-            this.Mode_Combobox.Size = new System.Drawing.Size(414, 28);
-            this.Mode_Combobox.TabIndex = 9;
-            this.Mode_Combobox.Text = global::ReserveCopier.Properties.Settings.Default.CopyModeValue;
-            this.Mode_Combobox.TextChanged += new System.EventHandler(this.Mode_Combobox_TextChanged);
-            // 
-            // outpathTxtbx
-            // 
-            this.outpathTxtbx.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::ReserveCopier.Properties.Settings.Default, "OutputPath", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.outpathTxtbx.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.outpathTxtbx.Location = new System.Drawing.Point(406, 40);
-            this.outpathTxtbx.Name = "outpathTxtbx";
-            this.outpathTxtbx.Size = new System.Drawing.Size(414, 26);
-            this.outpathTxtbx.TabIndex = 4;
-            this.outpathTxtbx.Text = global::ReserveCopier.Properties.Settings.Default.OutputPath;
+            this.ParallelCopy_Checkbox.AutoSize = true;
+            this.ParallelCopy_Checkbox.Checked = global::ReserveCopier.Properties.Settings.Default.ParallelCopy;
+            this.ParallelCopy_Checkbox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::ReserveCopier.Properties.Settings.Default, "ParallelCopy", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.ParallelCopy_Checkbox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.ParallelCopy_Checkbox.Location = new System.Drawing.Point(406, 464);
+            this.ParallelCopy_Checkbox.Name = "ParallelCopy_Checkbox";
+            this.ParallelCopy_Checkbox.Size = new System.Drawing.Size(391, 24);
+            this.ParallelCopy_Checkbox.TabIndex = 13;
+            this.ParallelCopy_Checkbox.Text = "Параллельное копирование (высокая нагрузка)";
+            this.ParallelCopy_Checkbox.UseVisualStyleBackColor = true;
             // 
             // SettingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.cancel_bttn;
-            this.ClientSize = new System.Drawing.Size(832, 567);
+            this.ClientSize = new System.Drawing.Size(832, 566);
             this.Controls.Add(this.MainSettingPanel);
             this.MaximizeBox = false;
             this.MaximumSize = new System.Drawing.Size(848, 605);
@@ -406,5 +421,6 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.CheckBox autoscroll_logDGV;
+        private System.Windows.Forms.CheckBox ParallelCopy_Checkbox;
     }
 }

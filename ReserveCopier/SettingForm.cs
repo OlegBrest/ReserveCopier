@@ -84,6 +84,7 @@ namespace ReserveCopier
             Properties.Settings.Default.periodicHours = hours_numericUpDown.Value;
             Properties.Settings.Default.PeriodicMinutes = minuts_numericUpDown.Value;
             Properties.Settings.Default.AutoScroolLog = autoscroll_logDGV.Checked;
+            Properties.Settings.Default.ParallelCopy = ParallelCopy_Checkbox.Checked;
             Properties.Settings.Default.Save();
             Properties.Settings.Default.Reload();
             this.DialogResult = DialogResult.OK;

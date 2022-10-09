@@ -166,5 +166,17 @@ namespace ReserveCopier.Properties {
                 this["AutoStartCopy"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ParallelCopy {
+            get {
+                return ((bool)(this["ParallelCopy"]));
+            }
+            set {
+                this["ParallelCopy"] = value;
+            }
+        }
     }
 }
