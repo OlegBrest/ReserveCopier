@@ -411,6 +411,7 @@
             this.MinimumSize = new System.Drawing.Size(816, 532);
             this.Name = "MainReservCopyer";
             this.Text = "Резервное копирование";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainReservCopyer_FormClosed);
             this.MainPanel.ResumeLayout(false);
             this.MainPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewprogress)).EndInit();

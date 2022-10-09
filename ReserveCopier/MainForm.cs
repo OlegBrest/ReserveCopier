@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -1086,5 +1087,74 @@ namespace ReserveCopier
             loglist.Add(ls);
             //blistlog.Add(ls);
         }
+
+        private void MainReservCopyer_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            System.Environment.Exit(0);
+        }
+
+        #region установка повышенных прав приложения
+        static bool RequestSeBackupPrivilege()
+        {
+            LUID luid;
+
+            if (!LookupPrivilegeValue(null, "SeBackupPrivilege", out luid))
+                return false;
+
+            TOKEN_PRIVILEGES_SINGLE tp = new TOKEN_PRIVILEGES_SINGLE
+            {
+                PrivilegeCount = 1,
+                Luid = luid,
+                Attributes = SE_PRIVILEGE_ENABLED
+            };
+
+            IntPtr hToken;
+            return
+                OpenProcessToken(
+                    GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, out hToken) &&
+                AdjustTokenPrivileges(
+                    hToken, false, ref tp, 0, IntPtr.Zero, IntPtr.Zero) &&
+                (Marshal.GetLastWin32Error() != ERROR_NOT_ALL_ASSIGNED);
+        }
+
+        const int SE_PRIVILEGE_ENABLED = 0x00000002;
+        const int TOKEN_QUERY = 0x00000008;
+        const int TOKEN_ADJUST_PRIVILEGES = 0x00000020;
+        const int ERROR_NOT_ALL_ASSIGNED = 1300;
+
+        [DllImport("kernel32.dll", ExactSpelling = true)]
+        static extern IntPtr GetCurrentProcess();
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct TOKEN_PRIVILEGES_SINGLE
+        {
+            public UInt32 PrivilegeCount;
+            public LUID Luid;
+            public UInt32 Attributes;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct LUID
+        {
+            public uint LowPart;
+            public int HighPart;
+        }
+
+        [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool LookupPrivilegeValue(
+            string lpSystemName, string lpName, out LUID lpLuid);
+
+        [DllImport("advapi32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool OpenProcessToken(
+            IntPtr ProcessHandle, UInt32 DesiredAccess, out IntPtr TokenHandle);
+
+        [DllImport("advapi32.dll", ExactSpelling = true, SetLastError = true)]
+        static extern bool AdjustTokenPrivileges(
+            IntPtr htok, bool disall, ref TOKEN_PRIVILEGES_SINGLE newst,
+            int len, IntPtr prev, IntPtr relen);
+        #endregion
+
     }
 }
