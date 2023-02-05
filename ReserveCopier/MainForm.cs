@@ -115,6 +115,11 @@ namespace ReserveCopier
             test_dgv.Columns.Add("test", "Тест");
             test_dgv.Columns[0].DataPropertyName = "value";
             test_dgv.DataSource = testBSL;
+
+            if (!RequestSeBackupPrivilege())
+            {
+                logg("Cannot request privilege: ");
+            }
         }
 
         #region автозапуск
