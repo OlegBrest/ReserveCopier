@@ -260,14 +260,17 @@ namespace ReserveCopier
             {
                 checkForDirFile(path);
             }//);
+
         }
 
         /// <summary>
         /// Запись в основной файл данных о файлах и каталогах
         /// </summary>
-        /// <param name="path"></param>
-        private void checkForDirFile(string path)
+        /// <param name="extpath"></param>
+        private void checkForDirFile(string extpath)
         {
+            string path = extpath;
+
             if (File.Exists(path))
             {
                 if (path.Length < 32567)
