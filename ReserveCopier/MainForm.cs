@@ -62,6 +62,8 @@ namespace ReserveCopier
 
         BindingList<LogStr> testBSL = new BindingList<LogStr>();
         BindingSource testbs = new BindingSource();
+        List<string> dirsList = new List<string>();
+
 
         public MainReservCopyer()
         {
@@ -120,6 +122,7 @@ namespace ReserveCopier
             {
                 logg("Cannot request privilege: ");
             }
+            dirsList.Clear();
         }
 
         #region автозапуск
@@ -239,8 +242,8 @@ namespace ReserveCopier
                 mainFiledata.Clear();
                 currFileData.Clear();
                 diffFiledata.Clear();
+                dirsList.Clear();
                 string[] Paths = Properties.Settings.Default.InputPaths.Split('\n');
-
                 trdfilecalc = new Thread(CalcTotalFileDirsCount);
                 trdfilecalc.Start(Paths);
                 currstep = 1;
@@ -269,7 +272,8 @@ namespace ReserveCopier
         /// <param name="extpath"></param>
         private void checkForDirFile(string extpath)
         {
-            string path = extpath;
+            DirectoryInfo dirinfo = new DirectoryInfo(new DirectoryInfo(extpath).GetSymbolicLinkTarget());
+            string path = dirinfo.FullName;
 
             if (File.Exists(path))
             {
@@ -290,8 +294,9 @@ namespace ReserveCopier
             }
             else
             {
-                if (Directory.Exists(path))
+                if (!dirsList.Contains(path) && Directory.Exists(path))
                 {
+                    dirsList.Add(path);
                     TotalDirs++;
                     try
                     {
@@ -308,6 +313,7 @@ namespace ReserveCopier
                             //progressList.Add(DateTime.Now.ToLongTimeString() + " . Ошибка : " + ex.Message);
                             //dtLog.Rows.Add(DateTime.Now, "134.Ошибка : " + ex.Message);
                             logg("265.Ошибка : " + ex.Message);
+                            logg(path);
                             //InterfaceUpdateTimer_Tick();
                         }
                     }
@@ -316,6 +322,7 @@ namespace ReserveCopier
                         //progressList.Add(DateTime.Now.ToLongTimeString() + " . Ошибка : " + ex.Message);
                         //dtLog.Rows.Add(DateTime.Now, "141.Ошибка : " + ex.Message);
                         logg("273.Ошибка : " + ex.Message);
+                        logg(path);
                         //InterfaceUpdateTimer_Tick();
                     }
                 }
