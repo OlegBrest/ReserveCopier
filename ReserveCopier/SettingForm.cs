@@ -71,6 +71,9 @@ namespace ReserveCopier
             Properties.Settings.Default.InputPaths = inputPaths;
             Properties.Settings.Default.CopyModeValue = Mode_Combobox.Text;
             Properties.Settings.Default.FullCopyPeriodic = fullcopy_Combobox.Text;
+            Properties.Settings.Default.DeleteOld = deleteOldCheckBox.Checked;
+            Properties.Settings.Default.DelPeriodNum = deleteOldNumericUpDown.Value;
+            Properties.Settings.Default.DelPeriodStr = DeleteOldPeriodComboBox.Text;
             string daysofweek = "";
             for (int i = 0; i < Days_checkedListBox.Items.Count; i++)
             {

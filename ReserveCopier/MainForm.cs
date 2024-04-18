@@ -64,6 +64,9 @@ namespace ReserveCopier
         BindingSource testbs = new BindingSource();
         List<string> dirsList = new List<string>();
 
+        bool deleteOldFiles = false;
+        int deletePeriodic = 1000;
+        string deletePeriod = "Минут";
 
         public MainReservCopyer()
         {
@@ -107,6 +110,7 @@ namespace ReserveCopier
             trdfilecalc = new Thread(CalcTotalFileDirsCount);
             trdfilecopy = new Thread(CopyFiles);
             //dtLog.Rows.Add(DateTime.Now, "52.Программа прошла инициализацию.");
+            ReloadSettings();
             logg("87.Программа прошла инициализацию.");
 
             CheckPaths();
@@ -128,14 +132,16 @@ namespace ReserveCopier
         #region автозапуск
         private void AutoCheckTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
+            if (deleteOldFiles)
+            {
+                StartDeleteOldFiles();
+            }
             DateTime dateNow = DateTime.Now;
-
             string dayofweek = Properties.Settings.Default.DayOfWeekCheck;
             int HourAdd = (int)Properties.Settings.Default.periodicHours;
             int MinutsAdd = (int)Properties.Settings.Default.PeriodicMinutes;
             DateTime nextdiffevent = Properties.Settings.Default.LastDiffTime.AddHours(HourAdd).AddMinutes(MinutsAdd);
             string CopyType = Properties.Settings.Default.CopyModeValue;
-
             string FullWriteMode = Properties.Settings.Default.FullCopyPeriodic;
             DateTime nextfullevent = Properties.Settings.Default.LastFullTime;
             switch (FullWriteMode)
@@ -191,6 +197,108 @@ namespace ReserveCopier
             }
         }
         #endregion
+        private void StartDeleteOldFiles()
+        {
+            logg("202. Удаляю старые файлы");
+            DateTime DateToDelete = DateTime.Now;
+            switch (deletePeriod)
+            {
+                case "Минут":
+                    DateToDelete.AddMinutes(-deletePeriodic); break;
+                case "Часов":
+                    DateToDelete.AddHours(-deletePeriodic); break;
+                case "Дней":
+                    DateToDelete.AddDays(-deletePeriodic); break;
+                case "Недель":
+                    DateToDelete.AddDays(-deletePeriodic * 7); break;
+                case "Месяцев":
+                    DateToDelete.AddMonths(-deletePeriodic); break;
+            }
+            DirectoryInfo delPath = new DirectoryInfo(Properties.Settings.Default.OutputPath);
+            FileInfo[] diffiles = delPath.GetFiles("DIFFILE.txt", SearchOption.AllDirectories);
+            FileInfo[] mainfiles = delPath.GetFiles("MAINFULL.txt", SearchOption.AllDirectories);
+            foreach (FileInfo fi in diffiles)
+            {
+                if (fi.Exists)
+                {
+                    try
+                    {
+                        if (fi.CreationTime < DateToDelete)
+                        {
+                            DirectoryInfo di = new DirectoryInfo(fi.DirectoryName);
+                            DirectoryInfo[] diffdirs = di.GetDirectories("*", SearchOption.TopDirectoryOnly);
+                            foreach (DirectoryInfo dir in diffdirs)
+                            {
+                                try
+                                {
+                                    dir.Delete(true);
+                                }
+                                catch (Exception ex)
+                                {
+                                    logg("238." + ex.Message);
+                                }
+                            }
+                            Directory.Delete(fi.DirectoryName, true);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        logg("246." + ex.Message);
+                    }
+
+                }
+            }
+            foreach (FileInfo fi in mainfiles)
+            {
+                if (fi.Exists)
+                {
+                    try
+                    {
+                        DirectoryInfo di = new DirectoryInfo(fi.DirectoryName);
+                        DirectoryInfo[] maindirs = di.GetDirectories("*", SearchOption.TopDirectoryOnly);
+                        foreach (DirectoryInfo dir in maindirs)
+                        {
+                            try
+                            {
+                                dir.Delete(true);
+                            }
+                            catch (Exception ex)
+                            {
+                                logg("267." + ex.Message);
+                            }
+                        }
+                        Directory.Delete(fi.DirectoryName, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        logg("274." + ex.Message);
+                    }
+                }
+            }
+            // удаляем пустые папки
+            DeleteEmptyDirs(delPath);
+        }
+
+        private void DeleteEmptyDirs(DirectoryInfo dir)
+        {
+            DirectoryInfo [] directoryInfo = dir.GetDirectories();
+            FileInfo[] fileInfos = dir.GetFiles();
+            if (fileInfos.Length == 0)
+            {
+                if (directoryInfo.Length == 0)
+                {
+                    dir.Delete();
+                }
+                else
+                {
+                    foreach (DirectoryInfo _dir in directoryInfo)
+                    {
+                        DeleteEmptyDirs(_dir);
+                    }
+                }
+            }
+            else return;
+        }
 
         /// <summary>
         /// Установить двойной буфер для отрисовки , что бы не тормозило
@@ -226,10 +334,23 @@ namespace ReserveCopier
         {
             SettingForm sf = new SettingForm();
             DialogResult dr = sf.ShowDialog();
+            ReloadSettings();
+        }
+
+        private void ReloadSettings()
+        {
+            logg("238.Перезагружаю настройки");
+            deleteOldFiles = Properties.Settings.Default.DeleteOld;
+            deletePeriodic = (int)Properties.Settings.Default.DelPeriodNum;
+            deletePeriod = Properties.Settings.Default.DelPeriodStr;
         }
 
         private void start_bttn_Click(object sender, EventArgs e)
         {
+            if (deleteOldFiles)
+            {
+                StartDeleteOldFiles();
+            }
             // if ((!trdfilecopy.IsAlive) && (!trdfilecalc.IsAlive) && (!manualStart || autostart) && !calctrdstarted && !copying)
             if ((!trdfilecopy.IsAlive) && (!trdfilecalc.IsAlive) && (step == 0) && (currstep == 0))
             {
@@ -559,10 +680,8 @@ namespace ReserveCopier
             string Mode = Properties.Settings.Default.CopyModeValue;
             if (Mode.Equals("Полное")) CreateFullPriodicName = dt1.Year + "\\" + dt1.Month + "\\" + dt1.Day + "\\" + dt1.Hour;
             MainFilePath = Properties.Settings.Default.OutputPath + "\\" + CreateFullPriodicName + "\\";
-            Directory.CreateDirectory(MainFilePath);
             MainFileName = MainFilePath + "MAINFULL.txt";
             DiffFilePath = Properties.Settings.Default.OutputPath + "\\" + CreateDiffDay + "\\";
-            Directory.CreateDirectory(DiffFilePath);
             DiffFileName = DiffFilePath + "DIFFILE.txt";
             //dtLog.Rows.Add(DateTime.Now, MainFileName);
             //dtLog.Rows.Add(DateTime.Now, DiffFileName);
@@ -621,6 +740,7 @@ namespace ReserveCopier
                     //dtLog.Rows.Add(DateTime.Now, "518.Записываю файл отличий.");
                     logg("570.Записываю файл индексов отличий.");
                     //InterfaceUpdateTimer_Tick();
+                    if (!Directory.Exists(DiffFilePath)) Directory.CreateDirectory(DiffFilePath);
                     File.WriteAllLines(DiffFileName, difflines);
                     if (mode == 2)
                     {
@@ -646,6 +766,7 @@ namespace ReserveCopier
                 //dtLog.Rows.Add(DateTime.Now, "499.Записываю основной файл.");
                 logg("595.Записываю основной файл индексов.");
                 //InterfaceUpdateTimer_Tick();
+                if (!Directory.Exists(MainFilePath)) Directory.CreateDirectory(MainFilePath);
                 File.WriteAllLines(MainFileName, currlines);
                 Properties.Settings.Default.LastFullTime = DateTime.MinValue;
                 Properties.Settings.Default.Save();
@@ -862,7 +983,7 @@ namespace ReserveCopier
             speedMbs = 0;
             speedFiles = 0;
             int maxThreads = 10;
-            
+
 
             logg("849.Приступаю к копированию файлов. Итого " + speedfiles + " файлов");
             if (Properties.Settings.Default.ParallelCopy)
@@ -877,7 +998,7 @@ namespace ReserveCopier
                     TimeSpan ts = (DateTime.Now - starttime);
                     if (ts.TotalSeconds > 2)
                     {
-                        ProgressValue = (int)((((speedSize-TotalSize) / speedSize) * 100) + 0.5);
+                        ProgressValue = (int)((((speedSize - TotalSize) / speedSize) * 100) + 0.5);
                         if (TotalSize < 0) TotalSize = 0;
                         speedMbs = (speedMbs + (((double)(previoussize - TotalSize) / (1024 * 1024)) / ts.TotalMilliseconds) * 1000) / 2;
                         if (speedMbs < 0) speedMbs = 0;
@@ -906,7 +1027,7 @@ namespace ReserveCopier
                     {
                         ProgressValue = (int)((((speedSize - TotalSize) / speedSize) * 100) + 0.5);
                         if (TotalSize < 0) TotalSize = 0;
-                        speedMbs = (speedMbs + (((double)(previoussize-TotalSize) / (1024 * 1024)) / ts.TotalMilliseconds) * 1000) / 2;
+                        speedMbs = (speedMbs + (((double)(previoussize - TotalSize) / (1024 * 1024)) / ts.TotalMilliseconds) * 1000) / 2;
                         if (speedMbs < 0) speedMbs = 0;
                         speedFiles = (speedFiles + (previousFiles - TotalFiles) / ts.TotalSeconds) / 2;
                         if (speedFiles < 0) speedFiles = 0;
@@ -935,7 +1056,7 @@ namespace ReserveCopier
                 if (File.Exists(fs.FileFullName) && ((!isMain && !fs.FileState.Equals("d")) || isMain))
                 {
                     FileInfo fi = new FileInfo(fs.FileFullName);
-                    TotalSize = (TotalSize-fi.Length);
+                    TotalSize = (TotalSize - fi.Length);
                     string filename = fi.Name;
                     string savefilename = MainFilePath + (fs.FileFullName.Replace(":", ""));
                     string savingpath = savefilename.Substring(0, savefilename.Length - filename.Length);
