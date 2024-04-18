@@ -67,7 +67,8 @@ namespace ReserveCopier
         bool deleteOldFiles = false;
         int deletePeriodic = 1000;
         string deletePeriod = "Минут";
-
+        bool inDeleting = false;
+ 
         public MainReservCopyer()
         {
             InitializeComponent();
@@ -132,10 +133,6 @@ namespace ReserveCopier
         #region автозапуск
         private void AutoCheckTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            if (deleteOldFiles)
-            {
-                StartDeleteOldFiles();
-            }
             DateTime dateNow = DateTime.Now;
             string dayofweek = Properties.Settings.Default.DayOfWeekCheck;
             int HourAdd = (int)Properties.Settings.Default.periodicHours;
@@ -199,7 +196,6 @@ namespace ReserveCopier
         #endregion
         private void StartDeleteOldFiles()
         {
-            logg("202. Удаляю старые файлы");
             DateTime DateToDelete = DateTime.Now;
             switch (deletePeriod)
             {
@@ -216,7 +212,9 @@ namespace ReserveCopier
             }
             DirectoryInfo delPath = new DirectoryInfo(Properties.Settings.Default.OutputPath);
             FileInfo[] diffiles = delPath.GetFiles("DIFFILE.txt", SearchOption.AllDirectories);
+            logg("219.Всего найдено diff " + diffiles.Length.ToString());
             FileInfo[] mainfiles = delPath.GetFiles("MAINFULL.txt", SearchOption.AllDirectories);
+            logg("220.Всего найдено main " + mainfiles.Length.ToString());
             foreach (FileInfo fi in diffiles)
             {
                 if (fi.Exists)
@@ -225,6 +223,7 @@ namespace ReserveCopier
                     {
                         if (fi.CreationTime < DateToDelete)
                         {
+                            logg("227. Удаляю старые файлы из " + fi.DirectoryName);
                             DirectoryInfo di = new DirectoryInfo(fi.DirectoryName);
                             DirectoryInfo[] diffdirs = di.GetDirectories("*", SearchOption.TopDirectoryOnly);
                             foreach (DirectoryInfo dir in diffdirs)
@@ -254,24 +253,28 @@ namespace ReserveCopier
                 {
                     try
                     {
-                        DirectoryInfo di = new DirectoryInfo(fi.DirectoryName);
-                        DirectoryInfo[] maindirs = di.GetDirectories("*", SearchOption.TopDirectoryOnly);
-                        foreach (DirectoryInfo dir in maindirs)
+                        if (fi.CreationTime < DateToDelete)
                         {
-                            try
+                            logg("259. Удаляю старые файлы из " + fi.DirectoryName);
+                            DirectoryInfo di = new DirectoryInfo(fi.DirectoryName);
+                            DirectoryInfo[] maindirs = di.GetDirectories("*", SearchOption.TopDirectoryOnly);
+                            foreach (DirectoryInfo dir in maindirs)
                             {
-                                dir.Delete(true);
+                                try
+                                {
+                                    dir.Delete(true);
+                                }
+                                catch (Exception ex)
+                                {
+                                    logg("238." + ex.Message);
+                                }
                             }
-                            catch (Exception ex)
-                            {
-                                logg("267." + ex.Message);
-                            }
+                            Directory.Delete(fi.DirectoryName, true);
                         }
-                        Directory.Delete(fi.DirectoryName, true);
                     }
                     catch (Exception ex)
                     {
-                        logg("274." + ex.Message);
+                        logg("246." + ex.Message);
                     }
                 }
             }
@@ -343,18 +346,21 @@ namespace ReserveCopier
             deleteOldFiles = Properties.Settings.Default.DeleteOld;
             deletePeriodic = (int)Properties.Settings.Default.DelPeriodNum;
             deletePeriod = Properties.Settings.Default.DelPeriodStr;
+            inDeleting = false;
         }
 
         private void start_bttn_Click(object sender, EventArgs e)
         {
-            if (deleteOldFiles)
-            {
-                StartDeleteOldFiles();
-            }
             // if ((!trdfilecopy.IsAlive) && (!trdfilecalc.IsAlive) && (!manualStart || autostart) && !calctrdstarted && !copying)
             if ((!trdfilecopy.IsAlive) && (!trdfilecalc.IsAlive) && (step == 0) && (currstep == 0))
             {
                 step = 1;
+                if (deleteOldFiles && !inDeleting)
+                {
+                    inDeleting = true;
+                    StartDeleteOldFiles();
+                    inDeleting = false;
+                }
                 CheckPaths();
                 TotalDirs = 0;
                 TotalFiles = 0;
