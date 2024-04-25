@@ -74,6 +74,7 @@ namespace ReserveCopier
             Properties.Settings.Default.DeleteOld = deleteOldCheckBox.Checked;
             Properties.Settings.Default.DelPeriodNum = deleteOldNumericUpDown.Value;
             Properties.Settings.Default.DelPeriodStr = DeleteOldPeriodComboBox.Text;
+            Properties.Settings.Default.MinimizeInTray = MinimizeInTrayCheckBox.Checked;
             string daysofweek = "";
             for (int i = 0; i < Days_checkedListBox.Items.Count; i++)
             {

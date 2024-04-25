@@ -29,7 +29,16 @@
         private void InitializeComponent()
         {
             this.MainSettingPanel = new System.Windows.Forms.Panel();
+            this.DeleteOldPeriodComboBox = new System.Windows.Forms.ComboBox();
+            this.ParallelCopy_Checkbox = new System.Windows.Forms.CheckBox();
+            this.deleteOldCheckBox = new System.Windows.Forms.CheckBox();
+            this.autoscroll_logDGV = new System.Windows.Forms.CheckBox();
+            this.minuts_numericUpDown = new System.Windows.Forms.NumericUpDown();
+            this.deleteOldNumericUpDown = new System.Windows.Forms.NumericUpDown();
+            this.hours_numericUpDown = new System.Windows.Forms.NumericUpDown();
             this.Days_checkedListBox = new System.Windows.Forms.CheckedListBox();
+            this.fullcopy_Combobox = new System.Windows.Forms.ComboBox();
+            this.Mode_Combobox = new System.Windows.Forms.ComboBox();
             this.cancel_bttn = new System.Windows.Forms.Button();
             this.ok_bttn = new System.Windows.Forms.Button();
             this.label8 = new System.Windows.Forms.Label();
@@ -41,21 +50,13 @@
             this.label2 = new System.Windows.Forms.Label();
             this.OutPathBttn = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
+            this.outpathTxtbx = new System.Windows.Forms.TextBox();
             this.DeletePathBttn = new System.Windows.Forms.Button();
             this.EditPathBttn = new System.Windows.Forms.Button();
             this.InputPathLstBX = new System.Windows.Forms.CheckedListBox();
             this.AddPathBttn = new System.Windows.Forms.Button();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
-            this.DeleteOldPeriodComboBox = new System.Windows.Forms.ComboBox();
-            this.ParallelCopy_Checkbox = new System.Windows.Forms.CheckBox();
-            this.deleteOldCheckBox = new System.Windows.Forms.CheckBox();
-            this.autoscroll_logDGV = new System.Windows.Forms.CheckBox();
-            this.minuts_numericUpDown = new System.Windows.Forms.NumericUpDown();
-            this.deleteOldNumericUpDown = new System.Windows.Forms.NumericUpDown();
-            this.hours_numericUpDown = new System.Windows.Forms.NumericUpDown();
-            this.fullcopy_Combobox = new System.Windows.Forms.ComboBox();
-            this.Mode_Combobox = new System.Windows.Forms.ComboBox();
-            this.outpathTxtbx = new System.Windows.Forms.TextBox();
+            this.MinimizeInTrayCheckBox = new System.Windows.Forms.CheckBox();
             this.MainSettingPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.minuts_numericUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.deleteOldNumericUpDown)).BeginInit();
@@ -67,6 +68,7 @@
             this.MainSettingPanel.Controls.Add(this.DeleteOldPeriodComboBox);
             this.MainSettingPanel.Controls.Add(this.ParallelCopy_Checkbox);
             this.MainSettingPanel.Controls.Add(this.deleteOldCheckBox);
+            this.MainSettingPanel.Controls.Add(this.MinimizeInTrayCheckBox);
             this.MainSettingPanel.Controls.Add(this.autoscroll_logDGV);
             this.MainSettingPanel.Controls.Add(this.minuts_numericUpDown);
             this.MainSettingPanel.Controls.Add(this.deleteOldNumericUpDown);
@@ -92,206 +94,10 @@
             this.MainSettingPanel.Controls.Add(this.AddPathBttn);
             this.MainSettingPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.MainSettingPanel.Location = new System.Drawing.Point(0, 0);
-            this.MainSettingPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.MainSettingPanel.Margin = new System.Windows.Forms.Padding(4);
             this.MainSettingPanel.Name = "MainSettingPanel";
             this.MainSettingPanel.Size = new System.Drawing.Size(1083, 690);
             this.MainSettingPanel.TabIndex = 0;
-            // 
-            // Days_checkedListBox
-            // 
-            this.Days_checkedListBox.CheckOnClick = true;
-            this.Days_checkedListBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.Days_checkedListBox.FormattingEnabled = true;
-            this.Days_checkedListBox.Items.AddRange(new object[] {
-            "Понедельник",
-            "Вторник",
-            "Среда",
-            "Четверг",
-            "Пятница",
-            "Суббота",
-            "Воскресенье"});
-            this.Days_checkedListBox.Location = new System.Drawing.Point(541, 341);
-            this.Days_checkedListBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.Days_checkedListBox.Name = "Days_checkedListBox";
-            this.Days_checkedListBox.Size = new System.Drawing.Size(244, 151);
-            this.Days_checkedListBox.TabIndex = 10;
-            // 
-            // cancel_bttn
-            // 
-            this.cancel_bttn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.cancel_bttn.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.cancel_bttn.Location = new System.Drawing.Point(721, 645);
-            this.cancel_bttn.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.cancel_bttn.Name = "cancel_bttn";
-            this.cancel_bttn.Size = new System.Drawing.Size(176, 37);
-            this.cancel_bttn.TabIndex = 8;
-            this.cancel_bttn.Text = "Отменить";
-            this.cancel_bttn.UseVisualStyleBackColor = true;
-            // 
-            // ok_bttn
-            // 
-            this.ok_bttn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.ok_bttn.Location = new System.Drawing.Point(906, 645);
-            this.ok_bttn.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.ok_bttn.Name = "ok_bttn";
-            this.ok_bttn.Size = new System.Drawing.Size(169, 37);
-            this.ok_bttn.TabIndex = 7;
-            this.ok_bttn.Text = "OK";
-            this.ok_bttn.UseVisualStyleBackColor = true;
-            this.ok_bttn.Click += new System.EventHandler(this.ok_bttn_Click);
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label8.Location = new System.Drawing.Point(872, 412);
-            this.label8.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(72, 25);
-            this.label8.TabIndex = 5;
-            this.label8.Text = "минут";
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label7.Location = new System.Drawing.Point(880, 412);
-            this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(69, 25);
-            this.label7.TabIndex = 5;
-            this.label7.Text = "часов";
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label6.Location = new System.Drawing.Point(872, 377);
-            this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(69, 25);
-            this.label6.TabIndex = 5;
-            this.label6.Text = "часов";
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label5.Location = new System.Drawing.Point(795, 341);
-            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(166, 25);
-            this.label5.TabIndex = 5;
-            this.label5.Text = "Периодичность";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label4.Location = new System.Drawing.Point(535, 306);
-            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(297, 25);
-            this.label4.TabIndex = 5;
-            this.label4.Text = "Создание разностной копии";
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label3.Location = new System.Drawing.Point(535, 206);
-            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(253, 25);
-            this.label3.TabIndex = 5;
-            this.label3.Text = "Создание полной копии";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label2.Location = new System.Drawing.Point(535, 123);
-            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(215, 25);
-            this.label2.TabIndex = 5;
-            this.label2.Text = "Режим копирования";
-            // 
-            // OutPathBttn
-            // 
-            this.OutPathBttn.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.OutPathBttn.Location = new System.Drawing.Point(876, 78);
-            this.OutPathBttn.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.OutPathBttn.Name = "OutPathBttn";
-            this.OutPathBttn.Size = new System.Drawing.Size(195, 36);
-            this.OutPathBttn.TabIndex = 6;
-            this.OutPathBttn.Text = "Указать путь";
-            this.OutPathBttn.UseVisualStyleBackColor = true;
-            this.OutPathBttn.Click += new System.EventHandler(this.OutPathBttn_Click);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label1.Location = new System.Drawing.Point(535, 11);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(223, 25);
-            this.label1.TabIndex = 5;
-            this.label1.Text = "Путь для сохранения";
-            // 
-            // DeletePathBttn
-            // 
-            this.DeletePathBttn.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.DeletePathBttn.Location = new System.Drawing.Point(384, 4);
-            this.DeletePathBttn.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.DeletePathBttn.Name = "DeletePathBttn";
-            this.DeletePathBttn.Size = new System.Drawing.Size(137, 42);
-            this.DeletePathBttn.TabIndex = 3;
-            this.DeletePathBttn.Text = "Удалить";
-            this.DeletePathBttn.UseVisualStyleBackColor = true;
-            this.DeletePathBttn.Click += new System.EventHandler(this.DeletePathBttn_Click);
-            // 
-            // EditPathBttn
-            // 
-            this.EditPathBttn.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.EditPathBttn.Location = new System.Drawing.Point(180, 4);
-            this.EditPathBttn.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.EditPathBttn.Name = "EditPathBttn";
-            this.EditPathBttn.Size = new System.Drawing.Size(137, 42);
-            this.EditPathBttn.TabIndex = 3;
-            this.EditPathBttn.Text = "Изменить";
-            this.EditPathBttn.UseVisualStyleBackColor = true;
-            this.EditPathBttn.Click += new System.EventHandler(this.EditPathBttn_Click);
-            // 
-            // InputPathLstBX
-            // 
-            this.InputPathLstBX.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.InputPathLstBX.CheckOnClick = true;
-            this.InputPathLstBX.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.InputPathLstBX.HorizontalScrollbar = true;
-            this.InputPathLstBX.Location = new System.Drawing.Point(0, 50);
-            this.InputPathLstBX.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.InputPathLstBX.Name = "InputPathLstBX";
-            this.InputPathLstBX.Size = new System.Drawing.Size(520, 633);
-            this.InputPathLstBX.TabIndex = 2;
-            // 
-            // AddPathBttn
-            // 
-            this.AddPathBttn.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.AddPathBttn.Location = new System.Drawing.Point(4, 4);
-            this.AddPathBttn.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.AddPathBttn.Name = "AddPathBttn";
-            this.AddPathBttn.Size = new System.Drawing.Size(131, 42);
-            this.AddPathBttn.TabIndex = 1;
-            this.AddPathBttn.Text = "Добавить";
-            this.AddPathBttn.UseVisualStyleBackColor = true;
-            this.AddPathBttn.Click += new System.EventHandler(this.AddPathBttn_Click);
-            // 
-            // folderBrowserDialog
-            // 
-            this.folderBrowserDialog.RootFolder = System.Environment.SpecialFolder.MyComputer;
             // 
             // DeleteOldPeriodComboBox
             // 
@@ -412,6 +218,25 @@
             this.hours_numericUpDown.Value = global::ReserveCopier.Properties.Settings.Default.periodicHours;
             this.hours_numericUpDown.ValueChanged += new System.EventHandler(this.hours_numericUpDown_ValueChanged);
             // 
+            // Days_checkedListBox
+            // 
+            this.Days_checkedListBox.CheckOnClick = true;
+            this.Days_checkedListBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.Days_checkedListBox.FormattingEnabled = true;
+            this.Days_checkedListBox.Items.AddRange(new object[] {
+            "Понедельник",
+            "Вторник",
+            "Среда",
+            "Четверг",
+            "Пятница",
+            "Суббота",
+            "Воскресенье"});
+            this.Days_checkedListBox.Location = new System.Drawing.Point(541, 341);
+            this.Days_checkedListBox.Margin = new System.Windows.Forms.Padding(4);
+            this.Days_checkedListBox.Name = "Days_checkedListBox";
+            this.Days_checkedListBox.Size = new System.Drawing.Size(244, 151);
+            this.Days_checkedListBox.TabIndex = 10;
+            // 
             // fullcopy_Combobox
             // 
             this.fullcopy_Combobox.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::ReserveCopier.Properties.Settings.Default, "FullCopyPeriodic", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
@@ -448,6 +273,130 @@
             this.Mode_Combobox.Text = global::ReserveCopier.Properties.Settings.Default.CopyModeValue;
             this.Mode_Combobox.TextChanged += new System.EventHandler(this.Mode_Combobox_TextChanged);
             // 
+            // cancel_bttn
+            // 
+            this.cancel_bttn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.cancel_bttn.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.cancel_bttn.Location = new System.Drawing.Point(721, 645);
+            this.cancel_bttn.Margin = new System.Windows.Forms.Padding(4);
+            this.cancel_bttn.Name = "cancel_bttn";
+            this.cancel_bttn.Size = new System.Drawing.Size(176, 37);
+            this.cancel_bttn.TabIndex = 8;
+            this.cancel_bttn.Text = "Отменить";
+            this.cancel_bttn.UseVisualStyleBackColor = true;
+            // 
+            // ok_bttn
+            // 
+            this.ok_bttn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.ok_bttn.Location = new System.Drawing.Point(906, 645);
+            this.ok_bttn.Margin = new System.Windows.Forms.Padding(4);
+            this.ok_bttn.Name = "ok_bttn";
+            this.ok_bttn.Size = new System.Drawing.Size(169, 37);
+            this.ok_bttn.TabIndex = 7;
+            this.ok_bttn.Text = "OK";
+            this.ok_bttn.UseVisualStyleBackColor = true;
+            this.ok_bttn.Click += new System.EventHandler(this.ok_bttn_Click);
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label8.Location = new System.Drawing.Point(872, 412);
+            this.label8.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(72, 25);
+            this.label8.TabIndex = 5;
+            this.label8.Text = "минут";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label7.Location = new System.Drawing.Point(880, 412);
+            this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(69, 25);
+            this.label7.TabIndex = 5;
+            this.label7.Text = "часов";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label6.Location = new System.Drawing.Point(872, 377);
+            this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(69, 25);
+            this.label6.TabIndex = 5;
+            this.label6.Text = "часов";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label5.Location = new System.Drawing.Point(795, 341);
+            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(166, 25);
+            this.label5.TabIndex = 5;
+            this.label5.Text = "Периодичность";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label4.Location = new System.Drawing.Point(535, 306);
+            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(297, 25);
+            this.label4.TabIndex = 5;
+            this.label4.Text = "Создание разностной копии";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label3.Location = new System.Drawing.Point(535, 206);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(253, 25);
+            this.label3.TabIndex = 5;
+            this.label3.Text = "Создание полной копии";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label2.Location = new System.Drawing.Point(535, 123);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(215, 25);
+            this.label2.TabIndex = 5;
+            this.label2.Text = "Режим копирования";
+            // 
+            // OutPathBttn
+            // 
+            this.OutPathBttn.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.OutPathBttn.Location = new System.Drawing.Point(876, 78);
+            this.OutPathBttn.Margin = new System.Windows.Forms.Padding(4);
+            this.OutPathBttn.Name = "OutPathBttn";
+            this.OutPathBttn.Size = new System.Drawing.Size(195, 36);
+            this.OutPathBttn.TabIndex = 6;
+            this.OutPathBttn.Text = "Указать путь";
+            this.OutPathBttn.UseVisualStyleBackColor = true;
+            this.OutPathBttn.Click += new System.EventHandler(this.OutPathBttn_Click);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label1.Location = new System.Drawing.Point(535, 11);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(223, 25);
+            this.label1.TabIndex = 5;
+            this.label1.Text = "Путь для сохранения";
+            // 
             // outpathTxtbx
             // 
             this.outpathTxtbx.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::ReserveCopier.Properties.Settings.Default, "OutputPath", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
@@ -459,6 +408,74 @@
             this.outpathTxtbx.TabIndex = 4;
             this.outpathTxtbx.Text = global::ReserveCopier.Properties.Settings.Default.OutputPath;
             // 
+            // DeletePathBttn
+            // 
+            this.DeletePathBttn.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.DeletePathBttn.Location = new System.Drawing.Point(384, 4);
+            this.DeletePathBttn.Margin = new System.Windows.Forms.Padding(4);
+            this.DeletePathBttn.Name = "DeletePathBttn";
+            this.DeletePathBttn.Size = new System.Drawing.Size(137, 42);
+            this.DeletePathBttn.TabIndex = 3;
+            this.DeletePathBttn.Text = "Удалить";
+            this.DeletePathBttn.UseVisualStyleBackColor = true;
+            this.DeletePathBttn.Click += new System.EventHandler(this.DeletePathBttn_Click);
+            // 
+            // EditPathBttn
+            // 
+            this.EditPathBttn.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.EditPathBttn.Location = new System.Drawing.Point(180, 4);
+            this.EditPathBttn.Margin = new System.Windows.Forms.Padding(4);
+            this.EditPathBttn.Name = "EditPathBttn";
+            this.EditPathBttn.Size = new System.Drawing.Size(137, 42);
+            this.EditPathBttn.TabIndex = 3;
+            this.EditPathBttn.Text = "Изменить";
+            this.EditPathBttn.UseVisualStyleBackColor = true;
+            this.EditPathBttn.Click += new System.EventHandler(this.EditPathBttn_Click);
+            // 
+            // InputPathLstBX
+            // 
+            this.InputPathLstBX.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.InputPathLstBX.CheckOnClick = true;
+            this.InputPathLstBX.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.InputPathLstBX.HorizontalScrollbar = true;
+            this.InputPathLstBX.Location = new System.Drawing.Point(0, 50);
+            this.InputPathLstBX.Margin = new System.Windows.Forms.Padding(4);
+            this.InputPathLstBX.Name = "InputPathLstBX";
+            this.InputPathLstBX.Size = new System.Drawing.Size(520, 633);
+            this.InputPathLstBX.TabIndex = 2;
+            // 
+            // AddPathBttn
+            // 
+            this.AddPathBttn.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.AddPathBttn.Location = new System.Drawing.Point(4, 4);
+            this.AddPathBttn.Margin = new System.Windows.Forms.Padding(4);
+            this.AddPathBttn.Name = "AddPathBttn";
+            this.AddPathBttn.Size = new System.Drawing.Size(131, 42);
+            this.AddPathBttn.TabIndex = 1;
+            this.AddPathBttn.Text = "Добавить";
+            this.AddPathBttn.UseVisualStyleBackColor = true;
+            this.AddPathBttn.Click += new System.EventHandler(this.AddPathBttn_Click);
+            // 
+            // folderBrowserDialog
+            // 
+            this.folderBrowserDialog.RootFolder = System.Environment.SpecialFolder.MyComputer;
+            // 
+            // MinimizeInTrayCheckBox
+            // 
+            this.MinimizeInTrayCheckBox.AutoSize = true;
+            this.MinimizeInTrayCheckBox.Checked = global::ReserveCopier.Properties.Settings.Default.MinimizeInTray;
+            this.MinimizeInTrayCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.MinimizeInTrayCheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::ReserveCopier.Properties.Settings.Default, "MinimizeInTray", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.MinimizeInTrayCheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.MinimizeInTrayCheckBox.Location = new System.Drawing.Point(540, 597);
+            this.MinimizeInTrayCheckBox.Margin = new System.Windows.Forms.Padding(4);
+            this.MinimizeInTrayCheckBox.Name = "MinimizeInTrayCheckBox";
+            this.MinimizeInTrayCheckBox.Size = new System.Drawing.Size(289, 24);
+            this.MinimizeInTrayCheckBox.TabIndex = 13;
+            this.MinimizeInTrayCheckBox.Text = "Сворачивать в трей при закрытии";
+            this.MinimizeInTrayCheckBox.UseVisualStyleBackColor = true;
+            // 
             // SettingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -467,7 +484,7 @@
             this.ClientSize = new System.Drawing.Size(1083, 690);
             this.Controls.Add(this.MainSettingPanel);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "SettingForm";
@@ -511,5 +528,6 @@
         private System.Windows.Forms.ComboBox DeleteOldPeriodComboBox;
         private System.Windows.Forms.CheckBox deleteOldCheckBox;
         private System.Windows.Forms.NumericUpDown deleteOldNumericUpDown;
+        private System.Windows.Forms.CheckBox MinimizeInTrayCheckBox;
     }
 }

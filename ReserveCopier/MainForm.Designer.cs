@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainReservCopyer));
             this.MainPanel = new System.Windows.Forms.Panel();
             this.Path_txtBx = new System.Windows.Forms.TextBox();
@@ -57,6 +58,10 @@
             this.test_bs_susp_checkBox = new System.Windows.Forms.CheckBox();
             this.test_dt_checkBox = new System.Windows.Forms.CheckBox();
             this.test_dgv = new System.Windows.Forms.DataGridView();
+            this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
+            this.NotifyContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.MaximizeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ExitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewprogress)).BeginInit();
             this.main_toolstrip_panel.SuspendLayout();
@@ -65,6 +70,7 @@
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.test_dgv)).BeginInit();
+            this.NotifyContextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // MainPanel
@@ -400,6 +406,37 @@
             this.test_dgv.Size = new System.Drawing.Size(1002, 416);
             this.test_dgv.TabIndex = 0;
             // 
+            // notifyIcon
+            // 
+            this.notifyIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
+            this.notifyIcon.ContextMenuStrip = this.NotifyContextMenuStrip;
+            this.notifyIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon.Icon")));
+            this.notifyIcon.Text = "Резервное копирование";
+            this.notifyIcon.Visible = true;
+            this.notifyIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon_MouseClick);
+            // 
+            // NotifyContextMenuStrip
+            // 
+            this.NotifyContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MaximizeToolStripMenuItem,
+            this.ExitToolStripMenuItem});
+            this.NotifyContextMenuStrip.Name = "NotifyContextMenuStrip";
+            this.NotifyContextMenuStrip.Size = new System.Drawing.Size(194, 48);
+            // 
+            // MaximizeToolStripMenuItem
+            // 
+            this.MaximizeToolStripMenuItem.Name = "MaximizeToolStripMenuItem";
+            this.MaximizeToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+            this.MaximizeToolStripMenuItem.Text = "Развернуть";
+            this.MaximizeToolStripMenuItem.Click += new System.EventHandler(this.MaximizeToolStripMenuItem_Click);
+            // 
+            // ExitToolStripMenuItem
+            // 
+            this.ExitToolStripMenuItem.Name = "ExitToolStripMenuItem";
+            this.ExitToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+            this.ExitToolStripMenuItem.Text = "Выйти из программы";
+            this.ExitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
+            // 
             // MainReservCopyer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -411,6 +448,7 @@
             this.MinimumSize = new System.Drawing.Size(816, 532);
             this.Name = "MainReservCopyer";
             this.Text = "Резервное копирование";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainReservCopyer_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainReservCopyer_FormClosed);
             this.MainPanel.ResumeLayout(false);
             this.MainPanel.PerformLayout();
@@ -424,6 +462,7 @@
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.test_dgv)).EndInit();
+            this.NotifyContextMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -458,6 +497,10 @@
         private System.Windows.Forms.DataGridView test_dgv;
         private System.Windows.Forms.CheckBox test_bs_susp_checkBox;
         private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.NotifyIcon notifyIcon;
+        private System.Windows.Forms.ContextMenuStrip NotifyContextMenuStrip;
+        private System.Windows.Forms.ToolStripMenuItem MaximizeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ExitToolStripMenuItem;
     }
 }
 

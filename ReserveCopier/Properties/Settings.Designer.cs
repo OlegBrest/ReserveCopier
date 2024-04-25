@@ -214,5 +214,17 @@ namespace ReserveCopier.Properties {
                 this["DeleteOld"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool MinimizeInTray {
+            get {
+                return ((bool)(this["MinimizeInTray"]));
+            }
+            set {
+                this["MinimizeInTray"] = value;
+            }
+        }
     }
 }

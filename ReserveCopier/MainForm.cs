@@ -20,7 +20,7 @@ namespace ReserveCopier
         double TotalSize = 0;
         int log_rows = 0;
         static int currThreads = 0; // количество потоков для многопоточки
-
+        
         public struct LogStr
         {
             public DateTime dtstr { get; set; }
@@ -31,6 +31,9 @@ namespace ReserveCopier
 
         BindingList<LogStr> blistlog;
         List<LogStr> loglist;
+        FormWindowState _windowState = FormWindowState.Normal;
+        private bool MinimizeInTray = true;
+        bool programmClose = false;
 
         //DataTable dtfiles = new DataTable();
         //bool MainDiffFileWrite = false; // индикатор записи полного файла
@@ -68,7 +71,7 @@ namespace ReserveCopier
         int deletePeriodic = 1000;
         string deletePeriod = "Минут";
         bool inDeleting = false;
- 
+
         public MainReservCopyer()
         {
             InitializeComponent();
@@ -128,6 +131,7 @@ namespace ReserveCopier
                 logg("Cannot request privilege: ");
             }
             dirsList.Clear();
+            notifyIcon.Visible = true;
         }
 
         #region автозапуск
@@ -200,91 +204,74 @@ namespace ReserveCopier
             switch (deletePeriod)
             {
                 case "Минут":
-                    DateToDelete.AddMinutes(-deletePeriodic); break;
+                    DateToDelete = DateTime.Now.AddMinutes(-deletePeriodic); break;
                 case "Часов":
-                    DateToDelete.AddHours(-deletePeriodic); break;
+                    DateToDelete = DateTime.Now.AddHours(-deletePeriodic); break;
                 case "Дней":
-                    DateToDelete.AddDays(-deletePeriodic); break;
+                    DateToDelete = DateTime.Now.AddDays(-deletePeriodic); break;
                 case "Недель":
-                    DateToDelete.AddDays(-deletePeriodic * 7); break;
+                    DateToDelete = DateTime.Now.AddDays(-deletePeriodic * 7); break;
                 case "Месяцев":
-                    DateToDelete.AddMonths(-deletePeriodic); break;
+                    DateToDelete = DateTime.Now.AddMonths(-deletePeriodic); break;
             }
             DirectoryInfo delPath = new DirectoryInfo(Properties.Settings.Default.OutputPath);
-            FileInfo[] diffiles = delPath.GetFiles("DIFFILE.txt", SearchOption.AllDirectories);
-            logg("219.Всего найдено diff " + diffiles.Length.ToString());
-            FileInfo[] mainfiles = delPath.GetFiles("MAINFULL.txt", SearchOption.AllDirectories);
-            logg("220.Всего найдено main " + mainfiles.Length.ToString());
-            foreach (FileInfo fi in diffiles)
-            {
-                if (fi.Exists)
-                {
-                    try
-                    {
-                        if (fi.CreationTime < DateToDelete)
-                        {
-                            logg("227. Удаляю старые файлы из " + fi.DirectoryName);
-                            DirectoryInfo di = new DirectoryInfo(fi.DirectoryName);
-                            DirectoryInfo[] diffdirs = di.GetDirectories("*", SearchOption.TopDirectoryOnly);
-                            foreach (DirectoryInfo dir in diffdirs)
-                            {
-                                try
-                                {
-                                    dir.Delete(true);
-                                }
-                                catch (Exception ex)
-                                {
-                                    logg("238." + ex.Message);
-                                }
-                            }
-                            Directory.Delete(fi.DirectoryName, true);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        logg("246." + ex.Message);
-                    }
+            recurceDeleter("DIFFILE.txt", delPath, DateToDelete);
+            recurceDeleter("MAINFULL.txt", delPath, DateToDelete);
 
-                }
-            }
-            foreach (FileInfo fi in mainfiles)
-            {
-                if (fi.Exists)
-                {
-                    try
-                    {
-                        if (fi.CreationTime < DateToDelete)
-                        {
-                            logg("259. Удаляю старые файлы из " + fi.DirectoryName);
-                            DirectoryInfo di = new DirectoryInfo(fi.DirectoryName);
-                            DirectoryInfo[] maindirs = di.GetDirectories("*", SearchOption.TopDirectoryOnly);
-                            foreach (DirectoryInfo dir in maindirs)
-                            {
-                                try
-                                {
-                                    dir.Delete(true);
-                                }
-                                catch (Exception ex)
-                                {
-                                    logg("238." + ex.Message);
-                                }
-                            }
-                            Directory.Delete(fi.DirectoryName, true);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        logg("246." + ex.Message);
-                    }
-                }
-            }
             // удаляем пустые папки
             DeleteEmptyDirs(delPath);
         }
 
+        private void recurceDeleter(string KeyFileName, DirectoryInfo startDir, DateTime timeToDelete)
+        {
+            FileInfo[] files = startDir.GetFiles(KeyFileName, SearchOption.TopDirectoryOnly);
+            if (files.Length > 0)
+            {
+                foreach (FileInfo fi in files)
+                {
+                    if (fi.Exists)
+                    {
+                        try
+                        {
+                            if (fi.LastWriteTime < timeToDelete)
+                            {
+                                logg("232. Удаляю старые файлы из " + fi.DirectoryName);
+                                DirectoryInfo di = new DirectoryInfo(fi.DirectoryName);
+                                DirectoryInfo[] diffdirs = di.GetDirectories("*", SearchOption.TopDirectoryOnly);
+                                foreach (DirectoryInfo dir in diffdirs)
+                                {
+                                    try
+                                    {
+                                        dir.Delete(true);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        logg("243." + ex.Message);
+                                    }
+                                }
+                                Directory.Delete(fi.DirectoryName, true);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            logg("251." + ex.Message);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                DirectoryInfo[] dirs = startDir.GetDirectories("*", SearchOption.TopDirectoryOnly);
+                foreach (DirectoryInfo dir in dirs)
+                {
+                    recurceDeleter(KeyFileName, dir, timeToDelete);
+                }
+            }
+        }
+
         private void DeleteEmptyDirs(DirectoryInfo dir)
         {
-            DirectoryInfo [] directoryInfo = dir.GetDirectories();
+            DirectoryInfo[] directoryInfo = dir.GetDirectories();
             FileInfo[] fileInfos = dir.GetFiles();
             if (fileInfos.Length == 0)
             {
@@ -346,6 +333,7 @@ namespace ReserveCopier
             deleteOldFiles = Properties.Settings.Default.DeleteOld;
             deletePeriodic = (int)Properties.Settings.Default.DelPeriodNum;
             deletePeriod = Properties.Settings.Default.DelPeriodStr;
+            MinimizeInTray = Properties.Settings.Default.MinimizeInTray;
             inDeleting = false;
         }
 
@@ -1298,5 +1286,36 @@ namespace ReserveCopier
             int len, IntPtr prev, IntPtr relen);
         #endregion
 
+        private void MainReservCopyer_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if ((e.CloseReason == CloseReason.UserClosing) && MinimizeInTray && !programmClose)
+            {
+                e.Cancel = true;
+                this.ShowInTaskbar = false;
+                _windowState = this.WindowState;
+                this.WindowState = FormWindowState.Minimized;
+
+            }
+        }
+
+        private void MaximizeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.WindowState = _windowState;
+        }
+
+        private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            notifyIcon.Visible = false;
+            programmClose = true;
+            this.Close();
+        }
+
+        private void notifyIcon_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                this.WindowState = _windowState;
+            }
+        }
     }
 }
