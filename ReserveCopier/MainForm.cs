@@ -1291,16 +1291,17 @@ namespace ReserveCopier
             if ((e.CloseReason == CloseReason.UserClosing) && MinimizeInTray && !programmClose)
             {
                 e.Cancel = true;
-                this.ShowInTaskbar = false;
                 _windowState = this.WindowState;
                 this.WindowState = FormWindowState.Minimized;
-
+                this.ShowInTaskbar = false;
             }
         }
 
         private void MaximizeToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            this.ShowInTaskbar = true;
             this.WindowState = _windowState;
+           
         }
 
         private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1314,6 +1315,7 @@ namespace ReserveCopier
         {
             if (e.Button == MouseButtons.Left)
             {
+                this.ShowInTaskbar = true;
                 this.WindowState = _windowState;
             }
         }
