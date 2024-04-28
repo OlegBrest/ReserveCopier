@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace ReserveCopier
         double TotalSize = 0;
         int log_rows = 0;
         static int currThreads = 0; // количество потоков для многопоточки
-        
+
         public struct LogStr
         {
             public DateTime dtstr { get; set; }
@@ -63,7 +64,7 @@ namespace ReserveCopier
         System.Timers.Timer AutoCheckTimer = new System.Timers.Timer();
 
 
-        BindingList<LogStr> testBSL = new BindingList<LogStr>();
+        //BindingList<LogStr> testBSL = new BindingList<LogStr>();
         BindingSource testbs = new BindingSource();
         List<string> dirsList = new List<string>();
 
@@ -71,11 +72,14 @@ namespace ReserveCopier
         int deletePeriodic = 1000;
         string deletePeriod = "Минут";
         bool inDeleting = false;
+        SortableBindingList<FileInfo> reserveCopyes = new SortableBindingList<FileInfo>();
+
 
         public MainReservCopyer()
         {
             InitializeComponent();
             SetDoubleBuffered(dataGridViewprogress);
+            SetDoubleBuffered(reserv_dgv);
             /*
             dtLog.Columns.Add("Время", typeof(DateTime));
             dtLog.Columns.Add("Cообщение", typeof(string));
@@ -119,19 +123,21 @@ namespace ReserveCopier
 
             CheckPaths();
 
-            test_dgv.AutoGenerateColumns = true;
-            testbs.DataSource = testBSL;
+            reserv_dgv.AutoGenerateColumns = true;
+            //testbs.DataSource = testBSL;
             //testbs.DataMember = "Lenght";
-            test_dgv.Columns.Add("test", "Тест");
-            test_dgv.Columns[0].DataPropertyName = "value";
-            test_dgv.DataSource = testBSL;
-
+            /* test_dgv.Columns.Add("test", "Тест");
+             test_dgv.Columns[0].DataPropertyName = "value";
+             test_dgv.DataSource = testBSL;*/
             if (!RequestSeBackupPrivilege())
             {
                 logg("Cannot request privilege: ");
             }
             dirsList.Clear();
             notifyIcon.Visible = true;
+            updateReserves();
+            testbs.DataSource = reserveCopyes;
+            reserv_dgv.DataSource = testbs;
         }
 
         #region автозапуск
@@ -214,15 +220,16 @@ namespace ReserveCopier
                 case "Месяцев":
                     DateToDelete = DateTime.Now.AddMonths(-deletePeriodic); break;
             }
-            DirectoryInfo delPath = new DirectoryInfo(Properties.Settings.Default.OutputPath);
-            recurceDeleter("DIFFILE.txt", delPath, DateToDelete);
-            recurceDeleter("MAINFULL.txt", delPath, DateToDelete);
+            DirectoryInfo scanPath = new DirectoryInfo(Properties.Settings.Default.OutputPath);
+            updateReserves();
+            reserveDeleter(DateToDelete);
+            reserveDeleter(DateToDelete);
 
             // удаляем пустые папки
-            DeleteEmptyDirs(delPath);
+            DeleteEmptyDirs(scanPath);
         }
 
-        private void recurceDeleter(string KeyFileName, DirectoryInfo startDir, DateTime timeToDelete)
+        private void GetReserveCopyes(string KeyFileName, DirectoryInfo startDir)
         {
             FileInfo[] files = startDir.GetFiles(KeyFileName, SearchOption.TopDirectoryOnly);
             if (files.Length > 0)
@@ -231,31 +238,7 @@ namespace ReserveCopier
                 {
                     if (fi.Exists)
                     {
-                        try
-                        {
-                            if (fi.LastWriteTime < timeToDelete)
-                            {
-                                logg("232. Удаляю старые файлы из " + fi.DirectoryName);
-                                DirectoryInfo di = new DirectoryInfo(fi.DirectoryName);
-                                DirectoryInfo[] diffdirs = di.GetDirectories("*", SearchOption.TopDirectoryOnly);
-                                foreach (DirectoryInfo dir in diffdirs)
-                                {
-                                    try
-                                    {
-                                        dir.Delete(true);
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        logg("243." + ex.Message);
-                                    }
-                                }
-                                Directory.Delete(fi.DirectoryName, true);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            logg("251." + ex.Message);
-                        }
+                        reserveCopyes.Add(fi);
                     }
                 }
             }
@@ -264,10 +247,83 @@ namespace ReserveCopier
                 DirectoryInfo[] dirs = startDir.GetDirectories("*", SearchOption.TopDirectoryOnly);
                 foreach (DirectoryInfo dir in dirs)
                 {
-                    recurceDeleter(KeyFileName, dir, timeToDelete);
+                    files = dir.GetFiles(KeyFileName, SearchOption.TopDirectoryOnly);
+                    if (files.Length > 0)
+                    {
+                        foreach (FileInfo fi in files)
+                        {
+                            if (fi.Exists)
+                            {
+                                reserveCopyes.Add(fi);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        GetReserveCopyes(KeyFileName, dir);
+                    }
                 }
             }
+            testbs.EndEdit();
         }
+
+        private void reserveDeleter(DateTime timeToDelete)
+        {
+            if (reserveCopyes.Count > 0)
+            {
+                foreach (FileInfo fi in reserveCopyes)
+                {
+                    if (fi.Exists)
+                    {
+                        try
+                        {
+                            if (fi.LastWriteTime < timeToDelete)
+                            {
+                                reserveDeleter(fi);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            logg("286." + ex.Message);
+                        }
+                    }
+                }
+            }
+
+        }
+
+        private void reserveDeleter(FileInfo fileInfo)
+        {
+            if (fileInfo.Exists)
+            {
+                try
+                {
+                    logg("316. Удаляю файлы из " + fileInfo.DirectoryName);
+                    DirectoryInfo di = new DirectoryInfo(fileInfo.DirectoryName);
+                    DirectoryInfo[] diffdirs = di.GetDirectories("*", SearchOption.TopDirectoryOnly);
+                    foreach (DirectoryInfo dir in diffdirs)
+                    {
+                        try
+                        {
+                            dir.Delete(true);
+                            DeleteEmptyDirs(dir);
+                        }
+                        catch (Exception ex)
+                        {
+                            logg("277." + ex.Message);
+                        }
+                    }
+                    diffdirs = di.GetDirectories("*", SearchOption.TopDirectoryOnly);
+                    if (diffdirs.Length == 0) Directory.Delete(fileInfo.DirectoryName, true);
+                }
+                catch (Exception ex)
+                {
+                    logg("286." + ex.Message);
+                }
+            }
+
+        }
+
 
         private void DeleteEmptyDirs(DirectoryInfo dir)
         {
@@ -378,7 +434,6 @@ namespace ReserveCopier
             {
                 checkForDirFile(path);
             }//);
-
         }
 
         /// <summary>
@@ -625,6 +680,7 @@ namespace ReserveCopier
         }
         private void updateProgressBar()
         {
+
             if (ProgressValue <= 0 || ProgressValue >= 100)
             {
                 if (progressBar.Visible == true)
@@ -632,6 +688,8 @@ namespace ReserveCopier
             }
             else
             {
+                if (ProgressValue > progressBar.Maximum) ProgressValue = progressBar.Maximum;
+                if (ProgressValue < progressBar.Minimum) ProgressValue = progressBar.Minimum;
                 progressBar.Visible = true;
                 progressBar.Value = ProgressValue;
                 progressBar.Update();
@@ -950,6 +1008,9 @@ namespace ReserveCopier
                     TotalSize = 0;
                     //dtLog.Rows.Add(DateTime.Now, "676.Скопированы файлы отличия." + diffFiledata.Count + " файлов");
                     logg("877.Скопированы файлы отличия." + diffFiledata.Count + " файлов");
+
+
+                    updateReserves();
                     //InterfaceUpdateTimer_Tick();
                 }
                 else
@@ -977,8 +1038,6 @@ namespace ReserveCopier
             speedMbs = 0;
             speedFiles = 0;
             int maxThreads = 10;
-
-
             logg("849.Приступаю к копированию файлов. Итого " + speedfiles + " файлов");
             if (Properties.Settings.Default.ParallelCopy)
             {
@@ -1172,40 +1231,18 @@ namespace ReserveCopier
             Properties.Settings.Default.Reload();
         }
 
-        private void test_dt_checkBox_CheckedChanged(object sender, EventArgs e)
+
+        private void updateReserves()
         {
-
-        }
-
-        private void test_dgv_checkBox_CheckedChanged(object sender, EventArgs e)
-        {
-            if (test_dgv_checkBox.Checked) test_dgv.ResumeLayout();
-            else test_dgv.SuspendLayout();
-
-        }
-
-        private void test_add_row_bttn_Click(object sender, EventArgs e)
-        {
-
-            //test_dgv.DataSource = testBSL;
-            testBSL.Add(new LogStr() { dtstr = DateTime.Now, mssg = "dfsdf" });
-        }
-
-        private void test_bs_susp_checkBox_CheckedChanged(object sender, EventArgs e)
-        {
-            if (test_bs_susp_checkBox.Checked) testbs.ResumeBinding();
-            else testbs.SuspendBinding();
-        }
-
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
-        {
-            if (checkBox1.Checked)
+            uniinvoker.TryInvoke(reserv_dgv, () =>
             {
-                testbs.RaiseListChangedEvents = true;
-                testbs.ResetBindings(false);
-            }
-            else testbs.RaiseListChangedEvents = false;
+                reserveCopyes.Clear();
+                DirectoryInfo scanPath = new DirectoryInfo(Properties.Settings.Default.OutputPath);
+                GetReserveCopyes("DIFFILE.txt", scanPath);
+                GetReserveCopyes("MAINFULL.txt", scanPath);
+            });
         }
+
 
         private void logg(string msg)
         {
@@ -1220,6 +1257,7 @@ namespace ReserveCopier
 
         private void MainReservCopyer_FormClosed(object sender, FormClosedEventArgs e)
         {
+            notifyIcon.Visible = false;
             System.Environment.Exit(0);
         }
 
@@ -1301,7 +1339,7 @@ namespace ReserveCopier
         {
             this.ShowInTaskbar = true;
             this.WindowState = _windowState;
-           
+
         }
 
         private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1318,6 +1356,19 @@ namespace ReserveCopier
                 this.ShowInTaskbar = true;
                 this.WindowState = _windowState;
             }
+        }
+
+        private void DeleteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FileInfo fi = new FileInfo(reserv_dgv.SelectedRows[0].Cells["FullName"].Value.ToString());
+            reserveDeleter(fi);
+            updateReserves();
+        }
+
+        private void OpenPathToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FileInfo fi = new FileInfo(reserv_dgv.SelectedRows[0].Cells["FullName"].Value.ToString());
+            Process.Start(fi.DirectoryName);
         }
     }
 }

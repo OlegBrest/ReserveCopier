@@ -52,16 +52,14 @@
             this.main_tabControl = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.test_add_row_bttn = new System.Windows.Forms.Button();
-            this.test_dgv_checkBox = new System.Windows.Forms.CheckBox();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.test_bs_susp_checkBox = new System.Windows.Forms.CheckBox();
-            this.test_dt_checkBox = new System.Windows.Forms.CheckBox();
-            this.test_dgv = new System.Windows.Forms.DataGridView();
+            this.reserv_dgv = new System.Windows.Forms.DataGridView();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.NotifyContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.MaximizeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ExitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ReserveContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.OpenPathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.DeleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewprogress)).BeginInit();
             this.main_toolstrip_panel.SuspendLayout();
@@ -69,8 +67,9 @@
             this.main_tabControl.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.test_dgv)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.reserv_dgv)).BeginInit();
             this.NotifyContextMenuStrip.SuspendLayout();
+            this.ReserveContextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // MainPanel
@@ -330,12 +329,7 @@
             // 
             // tabPage2
             // 
-            this.tabPage2.Controls.Add(this.test_add_row_bttn);
-            this.tabPage2.Controls.Add(this.test_dgv_checkBox);
-            this.tabPage2.Controls.Add(this.checkBox1);
-            this.tabPage2.Controls.Add(this.test_bs_susp_checkBox);
-            this.tabPage2.Controls.Add(this.test_dt_checkBox);
-            this.tabPage2.Controls.Add(this.test_dgv);
+            this.tabPage2.Controls.Add(this.reserv_dgv);
             this.tabPage2.Location = new System.Drawing.Point(4, 29);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
@@ -344,67 +338,23 @@
             this.tabPage2.Text = "Обзор резервных копий";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // test_add_row_bttn
-            // 
-            this.test_add_row_bttn.Location = new System.Drawing.Point(498, 433);
-            this.test_add_row_bttn.Name = "test_add_row_bttn";
-            this.test_add_row_bttn.Size = new System.Drawing.Size(243, 45);
-            this.test_add_row_bttn.TabIndex = 2;
-            this.test_add_row_bttn.Text = "button1";
-            this.test_add_row_bttn.UseVisualStyleBackColor = true;
-            this.test_add_row_bttn.Click += new System.EventHandler(this.test_add_row_bttn_Click);
-            // 
-            // test_dgv_checkBox
-            // 
-            this.test_dgv_checkBox.AutoSize = true;
-            this.test_dgv_checkBox.Location = new System.Drawing.Point(254, 433);
-            this.test_dgv_checkBox.Name = "test_dgv_checkBox";
-            this.test_dgv_checkBox.Size = new System.Drawing.Size(64, 24);
-            this.test_dgv_checkBox.TabIndex = 1;
-            this.test_dgv_checkBox.Text = "DGV";
-            this.test_dgv_checkBox.UseVisualStyleBackColor = true;
-            this.test_dgv_checkBox.CheckedChanged += new System.EventHandler(this.test_dgv_checkBox_CheckedChanged);
-            // 
-            // checkBox1
-            // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(254, 463);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(88, 24);
-            this.checkBox1.TabIndex = 1;
-            this.checkBox1.Text = "bs_raise";
-            this.checkBox1.UseVisualStyleBackColor = true;
-            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
-            // 
-            // test_bs_susp_checkBox
-            // 
-            this.test_bs_susp_checkBox.AutoSize = true;
-            this.test_bs_susp_checkBox.Location = new System.Drawing.Point(94, 463);
-            this.test_bs_susp_checkBox.Name = "test_bs_susp_checkBox";
-            this.test_bs_susp_checkBox.Size = new System.Drawing.Size(88, 24);
-            this.test_bs_susp_checkBox.TabIndex = 1;
-            this.test_bs_susp_checkBox.Text = "bs_susp";
-            this.test_bs_susp_checkBox.UseVisualStyleBackColor = true;
-            this.test_bs_susp_checkBox.CheckedChanged += new System.EventHandler(this.test_bs_susp_checkBox_CheckedChanged);
-            // 
-            // test_dt_checkBox
-            // 
-            this.test_dt_checkBox.AutoSize = true;
-            this.test_dt_checkBox.Location = new System.Drawing.Point(94, 433);
-            this.test_dt_checkBox.Name = "test_dt_checkBox";
-            this.test_dt_checkBox.Size = new System.Drawing.Size(98, 24);
-            this.test_dt_checkBox.TabIndex = 1;
-            this.test_dt_checkBox.Text = "DT. Begin";
-            this.test_dt_checkBox.UseVisualStyleBackColor = true;
-            this.test_dt_checkBox.CheckedChanged += new System.EventHandler(this.test_dt_checkBox_CheckedChanged);
-            // 
             // test_dgv
             // 
-            this.test_dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.test_dgv.Location = new System.Drawing.Point(3, 3);
-            this.test_dgv.Name = "test_dgv";
-            this.test_dgv.Size = new System.Drawing.Size(1002, 416);
-            this.test_dgv.TabIndex = 0;
+            this.reserv_dgv.AllowUserToAddRows = false;
+            this.reserv_dgv.AllowUserToDeleteRows = false;
+            this.reserv_dgv.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.reserv_dgv.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
+            this.reserv_dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.reserv_dgv.ContextMenuStrip = this.ReserveContextMenuStrip;
+            this.reserv_dgv.Location = new System.Drawing.Point(3, 3);
+            this.reserv_dgv.MultiSelect = false;
+            this.reserv_dgv.Name = "test_dgv";
+            this.reserv_dgv.ReadOnly = true;
+            this.reserv_dgv.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.reserv_dgv.Size = new System.Drawing.Size(1002, 493);
+            this.reserv_dgv.TabIndex = 0;
             // 
             // notifyIcon
             // 
@@ -437,6 +387,28 @@
             this.ExitToolStripMenuItem.Text = "Выйти из программы";
             this.ExitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
             // 
+            // ReserveContextMenuStrip
+            // 
+            this.ReserveContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.OpenPathToolStripMenuItem,
+            this.DeleteToolStripMenuItem});
+            this.ReserveContextMenuStrip.Name = "ReserveContextMenuStrip";
+            this.ReserveContextMenuStrip.Size = new System.Drawing.Size(213, 48);
+            // 
+            // OpenPathToolStripMenuItem
+            // 
+            this.OpenPathToolStripMenuItem.Name = "OpenPathToolStripMenuItem";
+            this.OpenPathToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
+            this.OpenPathToolStripMenuItem.Text = "Открыть место хранения";
+            this.OpenPathToolStripMenuItem.Click += new System.EventHandler(this.OpenPathToolStripMenuItem_Click);
+            // 
+            // DeleteToolStripMenuItem
+            // 
+            this.DeleteToolStripMenuItem.Name = "DeleteToolStripMenuItem";
+            this.DeleteToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
+            this.DeleteToolStripMenuItem.Text = "Удалить";
+            this.DeleteToolStripMenuItem.Click += new System.EventHandler(this.DeleteToolStripMenuItem_Click);
+            // 
             // MainReservCopyer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -460,9 +432,9 @@
             this.main_tabControl.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
-            this.tabPage2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.test_dgv)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.reserv_dgv)).EndInit();
             this.NotifyContextMenuStrip.ResumeLayout(false);
+            this.ReserveContextMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -491,16 +463,14 @@
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.CheckBox autostart_chkbx;
         private System.Windows.Forms.TextBox Path_txtBx;
-        private System.Windows.Forms.Button test_add_row_bttn;
-        private System.Windows.Forms.CheckBox test_dgv_checkBox;
-        private System.Windows.Forms.CheckBox test_dt_checkBox;
-        private System.Windows.Forms.DataGridView test_dgv;
-        private System.Windows.Forms.CheckBox test_bs_susp_checkBox;
-        private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.DataGridView reserv_dgv;
         private System.Windows.Forms.NotifyIcon notifyIcon;
         private System.Windows.Forms.ContextMenuStrip NotifyContextMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem MaximizeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ExitToolStripMenuItem;
+        private System.Windows.Forms.ContextMenuStrip ReserveContextMenuStrip;
+        private System.Windows.Forms.ToolStripMenuItem OpenPathToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem DeleteToolStripMenuItem;
     }
 }
 
