@@ -327,6 +327,7 @@ namespace ReserveCopier
 
         private void DeleteNonEmptyDirs(DirectoryInfo _dir)
         {
+            _dir.Attributes &= ~FileAttributes.ReadOnly;
             FileInfo[] files = _dir.GetFiles();
             foreach (FileInfo file in files)
             {
@@ -375,6 +376,7 @@ namespace ReserveCopier
             {
                 if (directoryInfo.Length == 0)
                 {
+                    dir.Attributes &= ~FileAttributes.ReadOnly;
                     dir.Delete();
                 }
                 else
