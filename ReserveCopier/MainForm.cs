@@ -8,6 +8,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -305,7 +307,7 @@ namespace ReserveCopier
                     {
                         try
                         {
-                            dir.Delete(true);
+                            DeleteNonEmptyDirs(dir);
                             DeleteEmptyDirs(dir);
                         }
                         catch (Exception ex)
@@ -321,9 +323,49 @@ namespace ReserveCopier
                     logg("286." + ex.Message);
                 }
             }
-
         }
 
+        private void DeleteNonEmptyDirs(DirectoryInfo _dir)
+        {
+            FileInfo[] files = _dir.GetFiles();
+            foreach (FileInfo file in files)
+            {
+                try
+                {
+                    if (file.Exists)
+                    {
+                        FileSecurity security = new FileSecurity(file.FullName,
+                AccessControlSections.Owner |
+                AccessControlSections.Group |
+                AccessControlSections.Access);
+                        IdentityReference owner = security.GetOwner(typeof(NTAccount));
+                        security.ModifyAccessRule(AccessControlModification.Set,
+    new FileSystemAccessRule(owner, FileSystemRights.FullControl, AccessControlType.Allow),
+    out bool modified);
+                    }
+                    file.Attributes &= ~FileAttributes.ReadOnly;
+                    File.Delete(file.FullName);
+                    //file.Delete();
+                }
+                catch (Exception ex)
+                {
+                    logg("337." + ex.Message);
+                }
+            }
+            DirectoryInfo[] diffdirs = _dir.GetDirectories("*", SearchOption.TopDirectoryOnly);
+            foreach (DirectoryInfo dir in diffdirs)
+            {
+                try
+                {
+                    DeleteNonEmptyDirs(dir);
+                    DeleteEmptyDirs(dir);
+                }
+                catch (Exception ex)
+                {
+                    logg("350." + ex.Message);
+                }
+            }
+        }
 
         private void DeleteEmptyDirs(DirectoryInfo dir)
         {
