@@ -873,6 +873,8 @@ namespace ReserveCopier
 
         private void CopyFiles(object mode)
         {
+            TotalFiles = 0;
+            TotalDirs = 0;
             //copying = true;
             int modeint = (int)mode;
             // делаем полную копию
@@ -945,7 +947,7 @@ namespace ReserveCopier
                     diffFiledata.Clear();
                     diffFiledata.InsertFromStrArr(File.ReadAllLines(DiffFileName));
                     TotalSize = diffFiledata.GetTotalSize();
-                    TotalFiles = diffFiledata.Count;
+                    TotalFiles = diffFiledata.Files.Count;
                     logg("784.Копирую файлы отличия.");
 
                     CopyFromDataFileToDisk(diffFiledata, false, modeint);
@@ -998,7 +1000,6 @@ namespace ReserveCopier
                                     //InterfaceUpdateTimer_Tick();
                                 }
                             }
-                            TotalFiles--;
                             currsize += fi.Length;
 
                             ProgressValue = (int)(((currsize / speedSize) * 100) + 0.5);
@@ -1028,7 +1029,6 @@ namespace ReserveCopier
                                     logg("851.Ошибка : " + ex.Message);
                                     //InterfaceUpdateTimer_Tick();
                                 }
-                                TotalFiles--;
                                 currsize += fi.Length;
 
                                 ProgressValue = (int)(((currsize / speedSize) * 100) + 0.5);
@@ -1200,10 +1200,6 @@ namespace ReserveCopier
                                 logg("864.Ошибка добавления в полную копию : " + ex.Message);
                                 //InterfaceUpdateTimer_Tick();
                             }
-                            finally
-                            {
-                                TotalFiles--;
-                            }
                         }
                         // скопируем удалённое из резерва
                         if (fs.FileState.Equals("d"))
@@ -1234,10 +1230,7 @@ namespace ReserveCopier
                                     logg("889.Ошибка : " + ex.Message);
                                     //InterfaceUpdateTimer_Tick();
                                 }
-                                finally
-                                {
-                                    TotalFiles--;
-                                }
+                                
 
                                 //ProgressValue = (int)(((currsize / speedSize) * 100) + 0.5);
                                 //TotalSize = speedSize - currsize;
@@ -1245,7 +1238,6 @@ namespace ReserveCopier
                                 //InterfaceUpdateTimer_Tick();
                             }
                         }
-
                     }
                 }
                 else if (fs.Type == "DIR")
