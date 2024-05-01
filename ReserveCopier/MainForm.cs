@@ -77,6 +77,7 @@ namespace ReserveCopier
         SortableBindingList<FileInfo> reserveCopyes = new SortableBindingList<FileInfo>();
 
 
+        
         public MainReservCopyer()
         {
             InitializeComponent();
@@ -231,10 +232,14 @@ namespace ReserveCopier
             DeleteEmptyDirs(scanPath);
         }
 
-        private void GetReserveCopyes(string KeyFileName, DirectoryInfo startDir)
+        private void GetReserveCopyes(string [] KeyFilesName, DirectoryInfo startDir)
         {
-            FileInfo[] files = startDir.GetFiles(KeyFileName, SearchOption.TopDirectoryOnly);
-            if (files.Length > 0)
+            List<FileInfo> files = new List<FileInfo>();
+            foreach (string name in KeyFilesName)
+            {
+                files.AddRange(startDir.GetFiles(name, SearchOption.TopDirectoryOnly));
+            }
+            if (files.Count > 0)
             {
                 foreach (FileInfo fi in files)
                 {
@@ -249,8 +254,12 @@ namespace ReserveCopier
                 DirectoryInfo[] dirs = startDir.GetDirectories("*", SearchOption.TopDirectoryOnly);
                 foreach (DirectoryInfo dir in dirs)
                 {
-                    files = dir.GetFiles(KeyFileName, SearchOption.TopDirectoryOnly);
-                    if (files.Length > 0)
+                    files.Clear();
+                    foreach (string name in KeyFilesName)
+                    {
+                        files.AddRange(startDir.GetFiles(name, SearchOption.TopDirectoryOnly));
+                    }
+                    if (files.Count > 0)
                     {
                         foreach (FileInfo fi in files)
                         {
@@ -262,7 +271,7 @@ namespace ReserveCopier
                     }
                     else
                     {
-                        GetReserveCopyes(KeyFileName, dir);
+                        GetReserveCopyes(KeyFilesName, dir);
                     }
                 }
             }
@@ -1230,7 +1239,7 @@ namespace ReserveCopier
                                     logg("889.Ошибка : " + ex.Message);
                                     //InterfaceUpdateTimer_Tick();
                                 }
-                                
+
 
                                 //ProgressValue = (int)(((currsize / speedSize) * 100) + 0.5);
                                 //TotalSize = speedSize - currsize;
@@ -1270,13 +1279,14 @@ namespace ReserveCopier
 
         private void updateReserves()
         {
+            Thread trd = new Thread(() =>
             uniinvoker.TryInvoke(reserv_dgv, () =>
             {
                 reserveCopyes.Clear();
                 DirectoryInfo scanPath = new DirectoryInfo(Properties.Settings.Default.OutputPath);
-                GetReserveCopyes("DIFFILE.txt", scanPath);
-                GetReserveCopyes("MAINFULL.txt", scanPath);
-            });
+                GetReserveCopyes(new string []{ "DIFFILE.txt","MAINFULL.txt"}, scanPath);
+            }));
+            trd.Start();
         }
 
 
