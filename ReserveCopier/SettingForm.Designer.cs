@@ -32,6 +32,7 @@
             this.DeleteOldPeriodComboBox = new System.Windows.Forms.ComboBox();
             this.ParallelCopy_Checkbox = new System.Windows.Forms.CheckBox();
             this.deleteOldCheckBox = new System.Windows.Forms.CheckBox();
+            this.MinimizeInTrayCheckBox = new System.Windows.Forms.CheckBox();
             this.autoscroll_logDGV = new System.Windows.Forms.CheckBox();
             this.minuts_numericUpDown = new System.Windows.Forms.NumericUpDown();
             this.deleteOldNumericUpDown = new System.Windows.Forms.NumericUpDown();
@@ -56,7 +57,6 @@
             this.InputPathLstBX = new System.Windows.Forms.CheckedListBox();
             this.AddPathBttn = new System.Windows.Forms.Button();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
-            this.MinimizeInTrayCheckBox = new System.Windows.Forms.CheckBox();
             this.MainSettingPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.minuts_numericUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.deleteOldNumericUpDown)).BeginInit();
@@ -144,6 +144,21 @@
             this.deleteOldCheckBox.TabIndex = 13;
             this.deleteOldCheckBox.Text = "Удалить резерв старше...";
             this.deleteOldCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // MinimizeInTrayCheckBox
+            // 
+            this.MinimizeInTrayCheckBox.AutoSize = true;
+            this.MinimizeInTrayCheckBox.Checked = global::ReserveCopier.Properties.Settings.Default.MinimizeInTray;
+            this.MinimizeInTrayCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.MinimizeInTrayCheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::ReserveCopier.Properties.Settings.Default, "MinimizeInTray", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.MinimizeInTrayCheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.MinimizeInTrayCheckBox.Location = new System.Drawing.Point(540, 597);
+            this.MinimizeInTrayCheckBox.Margin = new System.Windows.Forms.Padding(4);
+            this.MinimizeInTrayCheckBox.Name = "MinimizeInTrayCheckBox";
+            this.MinimizeInTrayCheckBox.Size = new System.Drawing.Size(289, 24);
+            this.MinimizeInTrayCheckBox.TabIndex = 13;
+            this.MinimizeInTrayCheckBox.Text = "Сворачивать в трей при закрытии";
+            this.MinimizeInTrayCheckBox.UseVisualStyleBackColor = true;
             // 
             // autoscroll_logDGV
             // 
@@ -460,21 +475,6 @@
             // folderBrowserDialog
             // 
             this.folderBrowserDialog.RootFolder = System.Environment.SpecialFolder.MyComputer;
-            // 
-            // MinimizeInTrayCheckBox
-            // 
-            this.MinimizeInTrayCheckBox.AutoSize = true;
-            this.MinimizeInTrayCheckBox.Checked = global::ReserveCopier.Properties.Settings.Default.MinimizeInTray;
-            this.MinimizeInTrayCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.MinimizeInTrayCheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::ReserveCopier.Properties.Settings.Default, "MinimizeInTray", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.MinimizeInTrayCheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.MinimizeInTrayCheckBox.Location = new System.Drawing.Point(540, 597);
-            this.MinimizeInTrayCheckBox.Margin = new System.Windows.Forms.Padding(4);
-            this.MinimizeInTrayCheckBox.Name = "MinimizeInTrayCheckBox";
-            this.MinimizeInTrayCheckBox.Size = new System.Drawing.Size(289, 24);
-            this.MinimizeInTrayCheckBox.TabIndex = 13;
-            this.MinimizeInTrayCheckBox.Text = "Сворачивать в трей при закрытии";
-            this.MinimizeInTrayCheckBox.UseVisualStyleBackColor = true;
             // 
             // SettingForm
             // 

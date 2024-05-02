@@ -34,6 +34,9 @@ namespace ReserveCopier
 
         private void EditPathBttn_Click(object sender, EventArgs e)
         {
+            string defaultPath = InputPathLstBX.Items[InputPathLstBX.Items.IndexOf(InputPathLstBX.CheckedItems[0])].ToString();
+            folderBrowserDialog.RootFolder = Environment.SpecialFolder.Desktop;
+            folderBrowserDialog.SelectedPath = defaultPath;
             DialogResult dr = folderBrowserDialog.ShowDialog();
             if (dr == DialogResult.OK)
             {
