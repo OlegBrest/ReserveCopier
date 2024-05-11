@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
+using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -44,7 +45,7 @@ namespace ReserveCopier
                 bool manualStart = false; // запуск по кнопке
                 bool calctrdstarted = false; // запускался поток пересчёта
                 bool copying = false; // в процессе копирования*/
-        int step = 0; // шаги по выполнению 0- ожидание , 1 - пересчёт файлов , 2 - запись индексов, 3 - запись файлов
+        int step = 0; // шаги по выполнению 0 - ожидание , 1 - пересчёт файлов , 2 - запись индексов, 3 - запись файлов
         int currstep = 0; // текущий шаг (в начале функции)
         Thread trdfilecalc; // поток подсчёта файлов
         Thread trdfilecopy; // поток копирования файлов
@@ -113,7 +114,7 @@ namespace ReserveCopier
 
             AutoCheckTimer.Elapsed += AutoCheckTimer_Elapsed;
             AutoCheckTimer.AutoReset = true;
-            AutoCheckTimer.Interval = 5000;
+            AutoCheckTimer.Interval = 30000;
             AutoCheckTimer.Enabled = Properties.Settings.Default.AutoStartCopy;
             if (autostart_chkbx.Checked) AutoCheckTimer.Start();
             else AutoCheckTimer.Stop();
@@ -146,6 +147,17 @@ namespace ReserveCopier
         #region автозапуск
         private void AutoCheckTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
+            uniinvoker.TryInvoke(this.autostart_chkbx, () => 
+            {
+                if (this.autostart_chkbx.BackColor == Color.LightPink)
+                {
+                    this.autostart_chkbx.BackColor = Color.LightGreen;
+                }
+                else
+                {
+                    this.autostart_chkbx.BackColor = Color.LightPink;
+                }
+            });
             DateTime dateNow = DateTime.Now;
             string dayofweek = Properties.Settings.Default.DayOfWeekCheck;
             int HourAdd = (int)Properties.Settings.Default.periodicHours;
@@ -452,6 +464,7 @@ namespace ReserveCopier
             if ((!trdfilecopy.IsAlive) && (!trdfilecalc.IsAlive) && (step == 0) && (currstep == 0))
             {
                 step = 1;
+                logg("467.step = 1");
                 if (deleteOldFiles && !inDeleting)
                 {
                     inDeleting = true;
@@ -472,6 +485,7 @@ namespace ReserveCopier
                 trdfilecalc.Start(Paths);
                 currstep = 1;
                 step = 0;
+                logg("488.currstep = 1;step = 0");
                 //calctrdstarted = true;
             }
             //manualStart = true;
@@ -591,7 +605,11 @@ namespace ReserveCopier
             else updateProgressBar();
 
             // запишем файл
-            if ((!trdfilecalc.IsAlive) && (currstep == 1) && (step == 0)) step = 1;
+            if ((!trdfilecalc.IsAlive) && (currstep == 1) && (step == 0))
+            {
+                step = 1;
+                logg("611.step = 1");
+            }
             //if (!trdfilecalc.IsAlive && !trdfilecopy.IsAlive && (manualStart || autostart) && !copying)
             if (!trdfilecalc.IsAlive && !trdfilecopy.IsAlive && (step != 0) && (currstep != 0))
             {
@@ -618,6 +636,7 @@ namespace ReserveCopier
                 if ((step == 2) && (currstep == 2))
                 {
                     currstep = 3;
+                    logg("639.currstep = 3");
                     trdfilecopy = new Thread(CopyFiles);
                     trdfilecopy.Start(modeint);
                 }
@@ -800,6 +819,7 @@ namespace ReserveCopier
         {
             //writingindexes = true;
             currstep = 2;
+            logg("822.currstep = 2");
             string[] currlines = new string[currFileData.Count];
             if (File.Exists(MainFileName))
             {
@@ -878,6 +898,7 @@ namespace ReserveCopier
                 Properties.Settings.Default.Reload();
             }
             step = 2;
+            logg("901.step = 2");
         }
 
         private void CopyFiles(object mode)
@@ -1078,6 +1099,7 @@ namespace ReserveCopier
             //copying = false;
             step = 0;
             currstep = 0;
+            logg("1102.currstep = 0;step = 0");
         }
 
         private void CopyFromDataFileToDisk(FileData df, bool isMain = true, int modeint = 1)
@@ -1270,7 +1292,11 @@ namespace ReserveCopier
         {
             //autostart = false;
             if (autostart_chkbx.Checked) AutoCheckTimer.Start();
-            else AutoCheckTimer.Stop();
+            else
+            {
+                AutoCheckTimer.Stop();
+                this.autostart_chkbx.BackColor = Color.Transparent;
+            }
             Properties.Settings.Default.AutoStartCopy = autostart_chkbx.Checked;
             Properties.Settings.Default.Save();
             Properties.Settings.Default.Reload();
