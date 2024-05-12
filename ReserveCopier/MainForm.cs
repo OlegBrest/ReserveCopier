@@ -212,7 +212,10 @@ namespace ReserveCopier
                 catch (Exception ex)
                 {
                     //dtLog.Rows.Add(DateTime.Now, "169.Ошибка : " + ex.Message);
-                    logg("155.Ошибка : " + ex.Message);
+                    step = 0;
+                    currstep = 0;
+                    logg("215.Ошибка : " + ex.Message);
+
                     //autostart = false;
                     //InterfaceUpdateTimer_Tick();
                 }
