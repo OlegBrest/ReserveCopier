@@ -29,11 +29,14 @@
         private void InitializeComponent()
         {
             this.MainSettingPanel = new System.Windows.Forms.Panel();
+            this.lowCapacityPeriodComboBox = new System.Windows.Forms.ComboBox();
             this.DeleteOldPeriodComboBox = new System.Windows.Forms.ComboBox();
             this.ParallelCopy_Checkbox = new System.Windows.Forms.CheckBox();
+            this.lowCapacityCheckBox = new System.Windows.Forms.CheckBox();
             this.deleteOldCheckBox = new System.Windows.Forms.CheckBox();
             this.MinimizeInTrayCheckBox = new System.Windows.Forms.CheckBox();
             this.autoscroll_logDGV = new System.Windows.Forms.CheckBox();
+            this.lowCapacityOldNumericUpDown = new System.Windows.Forms.NumericUpDown();
             this.minuts_numericUpDown = new System.Windows.Forms.NumericUpDown();
             this.deleteOldNumericUpDown = new System.Windows.Forms.NumericUpDown();
             this.hours_numericUpDown = new System.Windows.Forms.NumericUpDown();
@@ -58,6 +61,7 @@
             this.AddPathBttn = new System.Windows.Forms.Button();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.MainSettingPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.lowCapacityOldNumericUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.minuts_numericUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.deleteOldNumericUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.hours_numericUpDown)).BeginInit();
@@ -65,11 +69,14 @@
             // 
             // MainSettingPanel
             // 
+            this.MainSettingPanel.Controls.Add(this.lowCapacityPeriodComboBox);
             this.MainSettingPanel.Controls.Add(this.DeleteOldPeriodComboBox);
             this.MainSettingPanel.Controls.Add(this.ParallelCopy_Checkbox);
+            this.MainSettingPanel.Controls.Add(this.lowCapacityCheckBox);
             this.MainSettingPanel.Controls.Add(this.deleteOldCheckBox);
             this.MainSettingPanel.Controls.Add(this.MinimizeInTrayCheckBox);
             this.MainSettingPanel.Controls.Add(this.autoscroll_logDGV);
+            this.MainSettingPanel.Controls.Add(this.lowCapacityOldNumericUpDown);
             this.MainSettingPanel.Controls.Add(this.minuts_numericUpDown);
             this.MainSettingPanel.Controls.Add(this.deleteOldNumericUpDown);
             this.MainSettingPanel.Controls.Add(this.hours_numericUpDown);
@@ -99,6 +106,24 @@
             this.MainSettingPanel.Size = new System.Drawing.Size(1083, 690);
             this.MainSettingPanel.TabIndex = 0;
             // 
+            // lowCapacityPeriodComboBox
+            // 
+            this.lowCapacityPeriodComboBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::ReserveCopier.Properties.Settings.Default, "ClearForFreeSpaceSize", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.lowCapacityPeriodComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.lowCapacityPeriodComboBox.FormattingEnabled = true;
+            this.lowCapacityPeriodComboBox.Items.AddRange(new object[] {
+            "Минут",
+            "Часов",
+            "Дней",
+            "Недель",
+            "Месяцев"});
+            this.lowCapacityPeriodComboBox.Location = new System.Drawing.Point(919, 533);
+            this.lowCapacityPeriodComboBox.Margin = new System.Windows.Forms.Padding(4);
+            this.lowCapacityPeriodComboBox.Name = "lowCapacityPeriodComboBox";
+            this.lowCapacityPeriodComboBox.Size = new System.Drawing.Size(119, 24);
+            this.lowCapacityPeriodComboBox.TabIndex = 14;
+            this.lowCapacityPeriodComboBox.Text = global::ReserveCopier.Properties.Settings.Default.ClearForFreeSpaceSize;
+            // 
             // DeleteOldPeriodComboBox
             // 
             this.DeleteOldPeriodComboBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::ReserveCopier.Properties.Settings.Default, "DelPeriodStr", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
@@ -123,7 +148,7 @@
             this.ParallelCopy_Checkbox.Checked = global::ReserveCopier.Properties.Settings.Default.ParallelCopy;
             this.ParallelCopy_Checkbox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::ReserveCopier.Properties.Settings.Default, "ParallelCopy", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.ParallelCopy_Checkbox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.ParallelCopy_Checkbox.Location = new System.Drawing.Point(541, 526);
+            this.ParallelCopy_Checkbox.Location = new System.Drawing.Point(543, 471);
             this.ParallelCopy_Checkbox.Margin = new System.Windows.Forms.Padding(4);
             this.ParallelCopy_Checkbox.Name = "ParallelCopy_Checkbox";
             this.ParallelCopy_Checkbox.Size = new System.Drawing.Size(391, 24);
@@ -131,13 +156,28 @@
             this.ParallelCopy_Checkbox.Text = "Параллельное копирование (высокая нагрузка)";
             this.ParallelCopy_Checkbox.UseVisualStyleBackColor = true;
             // 
+            // lowCapacityCheckBox
+            // 
+            this.lowCapacityCheckBox.AutoSize = true;
+            this.lowCapacityCheckBox.Checked = global::ReserveCopier.Properties.Settings.Default.ClearForFreeSpaceCheck;
+            this.lowCapacityCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.lowCapacityCheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::ReserveCopier.Properties.Settings.Default, "ClearForFreeSpaceCheck", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.lowCapacityCheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.lowCapacityCheckBox.Location = new System.Drawing.Point(540, 532);
+            this.lowCapacityCheckBox.Margin = new System.Windows.Forms.Padding(4);
+            this.lowCapacityCheckBox.Name = "lowCapacityCheckBox";
+            this.lowCapacityCheckBox.Size = new System.Drawing.Size(294, 24);
+            this.lowCapacityCheckBox.TabIndex = 13;
+            this.lowCapacityCheckBox.Text = "Удерживать место на диске более";
+            this.lowCapacityCheckBox.UseVisualStyleBackColor = true;
+            // 
             // deleteOldCheckBox
             // 
             this.deleteOldCheckBox.AutoSize = true;
             this.deleteOldCheckBox.Checked = global::ReserveCopier.Properties.Settings.Default.DeleteOld;
             this.deleteOldCheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::ReserveCopier.Properties.Settings.Default, "DeleteOld", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.deleteOldCheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.deleteOldCheckBox.Location = new System.Drawing.Point(541, 565);
+            this.deleteOldCheckBox.Location = new System.Drawing.Point(540, 566);
             this.deleteOldCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.deleteOldCheckBox.Name = "deleteOldCheckBox";
             this.deleteOldCheckBox.Size = new System.Drawing.Size(225, 24);
@@ -166,7 +206,7 @@
             this.autoscroll_logDGV.Checked = global::ReserveCopier.Properties.Settings.Default.AutoScroolLog;
             this.autoscroll_logDGV.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::ReserveCopier.Properties.Settings.Default, "AutoScroolLog", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.autoscroll_logDGV.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.autoscroll_logDGV.Location = new System.Drawing.Point(541, 500);
+            this.autoscroll_logDGV.Location = new System.Drawing.Point(543, 445);
             this.autoscroll_logDGV.Margin = new System.Windows.Forms.Padding(4);
             this.autoscroll_logDGV.Name = "autoscroll_logDGV";
             this.autoscroll_logDGV.Size = new System.Drawing.Size(180, 24);
@@ -174,11 +214,28 @@
             this.autoscroll_logDGV.Text = "автопрокрутка лога";
             this.autoscroll_logDGV.UseVisualStyleBackColor = true;
             // 
+            // lowCapacityOldNumericUpDown
+            // 
+            this.lowCapacityOldNumericUpDown.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::ReserveCopier.Properties.Settings.Default, "ClearForFreeSpaceValue", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.lowCapacityOldNumericUpDown.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.lowCapacityOldNumericUpDown.Location = new System.Drawing.Point(842, 532);
+            this.lowCapacityOldNumericUpDown.Margin = new System.Windows.Forms.Padding(4);
+            this.lowCapacityOldNumericUpDown.Maximum = new decimal(new int[] {
+            9999,
+            0,
+            0,
+            0});
+            this.lowCapacityOldNumericUpDown.Name = "lowCapacityOldNumericUpDown";
+            this.lowCapacityOldNumericUpDown.Size = new System.Drawing.Size(71, 26);
+            this.lowCapacityOldNumericUpDown.TabIndex = 11;
+            this.lowCapacityOldNumericUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.lowCapacityOldNumericUpDown.Value = global::ReserveCopier.Properties.Settings.Default.ClearForFreeSpaceValue;
+            // 
             // minuts_numericUpDown
             // 
             this.minuts_numericUpDown.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::ReserveCopier.Properties.Settings.Default, "PeriodicMinutes", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.minuts_numericUpDown.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.minuts_numericUpDown.Location = new System.Drawing.Point(802, 414);
+            this.minuts_numericUpDown.Location = new System.Drawing.Point(804, 359);
             this.minuts_numericUpDown.Margin = new System.Windows.Forms.Padding(4);
             this.minuts_numericUpDown.Maximum = new decimal(new int[] {
             59,
@@ -195,7 +252,6 @@
             this.minuts_numericUpDown.TabIndex = 11;
             this.minuts_numericUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.minuts_numericUpDown.Value = global::ReserveCopier.Properties.Settings.Default.PeriodicMinutes;
-            this.minuts_numericUpDown.ValueChanged += new System.EventHandler(this.hours_numericUpDown_ValueChanged);
             // 
             // deleteOldNumericUpDown
             // 
@@ -213,13 +269,12 @@
             this.deleteOldNumericUpDown.TabIndex = 11;
             this.deleteOldNumericUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.deleteOldNumericUpDown.Value = global::ReserveCopier.Properties.Settings.Default.DelPeriodNum;
-            this.deleteOldNumericUpDown.ValueChanged += new System.EventHandler(this.hours_numericUpDown_ValueChanged);
             // 
             // hours_numericUpDown
             // 
             this.hours_numericUpDown.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::ReserveCopier.Properties.Settings.Default, "periodicHours", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.hours_numericUpDown.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.hours_numericUpDown.Location = new System.Drawing.Point(802, 375);
+            this.hours_numericUpDown.Location = new System.Drawing.Point(804, 320);
             this.hours_numericUpDown.Margin = new System.Windows.Forms.Padding(4);
             this.hours_numericUpDown.Maximum = new decimal(new int[] {
             23,
@@ -231,7 +286,6 @@
             this.hours_numericUpDown.TabIndex = 11;
             this.hours_numericUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.hours_numericUpDown.Value = global::ReserveCopier.Properties.Settings.Default.periodicHours;
-            this.hours_numericUpDown.ValueChanged += new System.EventHandler(this.hours_numericUpDown_ValueChanged);
             // 
             // Days_checkedListBox
             // 
@@ -246,7 +300,7 @@
             "Пятница",
             "Суббота",
             "Воскресенье"});
-            this.Days_checkedListBox.Location = new System.Drawing.Point(541, 341);
+            this.Days_checkedListBox.Location = new System.Drawing.Point(543, 286);
             this.Days_checkedListBox.Margin = new System.Windows.Forms.Padding(4);
             this.Days_checkedListBox.Name = "Days_checkedListBox";
             this.Days_checkedListBox.Size = new System.Drawing.Size(244, 151);
@@ -263,7 +317,7 @@
             "Еженедельно",
             "Ежемесячно",
             "Ежегодно"});
-            this.fullcopy_Combobox.Location = new System.Drawing.Point(541, 252);
+            this.fullcopy_Combobox.Location = new System.Drawing.Point(540, 210);
             this.fullcopy_Combobox.Margin = new System.Windows.Forms.Padding(4);
             this.fullcopy_Combobox.Name = "fullcopy_Combobox";
             this.fullcopy_Combobox.Size = new System.Drawing.Size(530, 28);
@@ -280,7 +334,7 @@
             "Полное",
             "Разностное относительно первой копии",
             "Разностное относительно последней копии"});
-            this.Mode_Combobox.Location = new System.Drawing.Point(541, 158);
+            this.Mode_Combobox.Location = new System.Drawing.Point(542, 136);
             this.Mode_Combobox.Margin = new System.Windows.Forms.Padding(4);
             this.Mode_Combobox.Name = "Mode_Combobox";
             this.Mode_Combobox.Size = new System.Drawing.Size(530, 28);
@@ -316,7 +370,7 @@
             // 
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label8.Location = new System.Drawing.Point(872, 412);
+            this.label8.Location = new System.Drawing.Point(874, 357);
             this.label8.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(72, 25);
@@ -327,7 +381,7 @@
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label7.Location = new System.Drawing.Point(880, 412);
+            this.label7.Location = new System.Drawing.Point(882, 357);
             this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(69, 25);
@@ -338,7 +392,7 @@
             // 
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label6.Location = new System.Drawing.Point(872, 377);
+            this.label6.Location = new System.Drawing.Point(874, 322);
             this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(69, 25);
@@ -349,7 +403,7 @@
             // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label5.Location = new System.Drawing.Point(795, 341);
+            this.label5.Location = new System.Drawing.Point(797, 286);
             this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(166, 25);
@@ -360,7 +414,7 @@
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label4.Location = new System.Drawing.Point(535, 306);
+            this.label4.Location = new System.Drawing.Point(537, 251);
             this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(297, 25);
@@ -371,7 +425,7 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label3.Location = new System.Drawing.Point(535, 206);
+            this.label3.Location = new System.Drawing.Point(537, 181);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(253, 25);
@@ -382,7 +436,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label2.Location = new System.Drawing.Point(535, 123);
+            this.label2.Location = new System.Drawing.Point(536, 101);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(215, 25);
@@ -491,6 +545,7 @@
             this.Text = "Настройки";
             this.MainSettingPanel.ResumeLayout(false);
             this.MainSettingPanel.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.lowCapacityOldNumericUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.minuts_numericUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.deleteOldNumericUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.hours_numericUpDown)).EndInit();
@@ -529,5 +584,8 @@
         private System.Windows.Forms.CheckBox deleteOldCheckBox;
         private System.Windows.Forms.NumericUpDown deleteOldNumericUpDown;
         private System.Windows.Forms.CheckBox MinimizeInTrayCheckBox;
+        private System.Windows.Forms.ComboBox lowCapacityPeriodComboBox;
+        private System.Windows.Forms.CheckBox lowCapacityCheckBox;
+        private System.Windows.Forms.NumericUpDown lowCapacityOldNumericUpDown;
     }
 }

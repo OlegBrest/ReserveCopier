@@ -21,6 +21,23 @@ namespace ReserveCopier
                     Days_checkedListBox.SetItemChecked(intday, true);
                 }
             }
+            lowCapacityPeriodComboBox.Items.Clear();
+            lowCapacityPeriodComboBox.Items.Add("Kb");
+            lowCapacityPeriodComboBox.Items.Add("Mb");
+            lowCapacityPeriodComboBox.Items.Add("Gb");
+            lowCapacityPeriodComboBox.Items.Add("Tb");
+
+            lowCapacityCheckBox.Checked = Properties.Settings.Default.ClearForFreeSpaceCheck;
+            lowCapacityOldNumericUpDown.Value = Properties.Settings.Default.ClearForFreeSpaceValue ;
+            lowCapacityPeriodComboBox.Text = Properties.Settings.Default.ClearForFreeSpaceSize;
+
+            foreach (int intday in DaysArray)
+            {
+                if (daysOfWeek.Contains(Enum.GetName(typeof(Day), intday)))
+                {
+                    Days_checkedListBox.SetItemChecked(intday, true);
+                }
+            }
         }
 
         private void AddPathBttn_Click(object sender, EventArgs e)
@@ -92,6 +109,9 @@ namespace ReserveCopier
             Properties.Settings.Default.PeriodicMinutes = minuts_numericUpDown.Value;
             Properties.Settings.Default.AutoScroolLog = autoscroll_logDGV.Checked;
             Properties.Settings.Default.ParallelCopy = ParallelCopy_Checkbox.Checked;
+            Properties.Settings.Default.ClearForFreeSpaceCheck = lowCapacityCheckBox.Checked;
+            Properties.Settings.Default.ClearForFreeSpaceValue = lowCapacityOldNumericUpDown.Value;
+            Properties.Settings.Default.ClearForFreeSpaceSize = lowCapacityPeriodComboBox.Text;
             Properties.Settings.Default.Save();
             Properties.Settings.Default.Reload();
             this.DialogResult = DialogResult.OK;
@@ -123,11 +143,6 @@ namespace ReserveCopier
                 minuts_numericUpDown.Enabled = true;
                 label7.Enabled = true;
             }
-        }
-
-        private void hours_numericUpDown_ValueChanged(object sender, EventArgs e)
-        {
-
         }
     }
 }

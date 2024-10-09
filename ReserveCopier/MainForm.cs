@@ -77,8 +77,10 @@ namespace ReserveCopier
         bool inDeleting = false;
         SortableBindingList<FileInfo> reserveCopyes = new SortableBindingList<FileInfo>();
 
+        bool delForFreeSpace = false;
+        ulong delMinSize = 1000000000;
+        DateTime oldestReserve = DateTime.MaxValue;
 
-        
         public MainReservCopyer()
         {
             InitializeComponent();
@@ -99,7 +101,7 @@ namespace ReserveCopier
             //dataGridViewprogress.Columns.Add ("data", "Время");
             //dataGridViewprogress.Columns.Add("mssg", "Сообщение");
             //dataGridViewprogress.Columns["data"].DefaultCellStyle.Format = "dd/MM/yyyy hh:mm:ss.fff";
-            loglist.Capacity = 200000;
+            loglist.Capacity = 50000;
             dataGridViewprogress.Columns["dtstr"].HeaderText = "Время";
             dataGridViewprogress.Columns["mssg"].HeaderText = "Сообщение";
             dataGridViewprogress.Columns["dtstr"].DefaultCellStyle.Format = "dd/MM/yyyy HH:mm:ss.fff";
@@ -123,7 +125,7 @@ namespace ReserveCopier
             trdfilecopy = new Thread(CopyFiles);
             //dtLog.Rows.Add(DateTime.Now, "52.Программа прошла инициализацию.");
             ReloadSettings();
-            logg("87.Программа прошла инициализацию.");
+            logg("128.MainReservCopyer.Программа прошла инициализацию.");
 
             CheckPaths();
 
@@ -147,7 +149,7 @@ namespace ReserveCopier
         #region автозапуск
         private void AutoCheckTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            uniinvoker.TryInvoke(this.autostart_chkbx, () => 
+            uniinvoker.TryInvoke(this.autostart_chkbx, () =>
             {
                 if (this.autostart_chkbx.BackColor == Color.LightPink)
                 {
@@ -239,16 +241,16 @@ namespace ReserveCopier
                     DateToDelete = DateTime.Now.AddMonths(-deletePeriodic); break;
             }
             DirectoryInfo scanPath = new DirectoryInfo(Properties.Settings.Default.OutputPath);
-            updateReserves();
-            reserveDeleter(DateToDelete);
-            reserveDeleter(DateToDelete);
+            updateReserves(DateToDelete);
 
             // удаляем пустые папки
             DeleteEmptyDirs(scanPath);
         }
 
-        private void GetReserveCopyes(string [] KeyFilesName, DirectoryInfo startDir)
+        private void GetReserveCopyes(string[] KeyFilesName, DirectoryInfo startDir)
         {
+            oldestReserve = DateTime.MaxValue;
+            if (!startDir.Exists) Directory.CreateDirectory(startDir.FullName);
             List<FileInfo> files = new List<FileInfo>();
             foreach (string name in KeyFilesName)
             {
@@ -260,7 +262,15 @@ namespace ReserveCopier
                 {
                     if (fi.Exists)
                     {
-                        reserveCopyes.Add(fi);
+                        try
+                        {
+                            reserveCopyes.Add(fi);
+                            if (fi.LastWriteTime < oldestReserve) oldestReserve = fi.LastWriteTime;
+                        }
+                        catch (Exception ex)
+                        {
+                            logg("271.MainForm.GetReserveCopyes. " + ex.Message);
+                        }
                     }
                 }
             }
@@ -281,6 +291,7 @@ namespace ReserveCopier
                             if (fi.Exists)
                             {
                                 reserveCopyes.Add(fi);
+                                if (fi.LastWriteTime < oldestReserve) oldestReserve = fi.LastWriteTime;
                             }
                         }
                     }
@@ -293,8 +304,9 @@ namespace ReserveCopier
             testbs.EndEdit();
         }
 
-        private void reserveDeleter(DateTime timeToDelete)
+        private bool reserveDeleter(DateTime timeToDelete)
         {
+            bool wasdeleted = false;
             if (reserveCopyes.Count > 0)
             {
                 foreach (FileInfo fi in reserveCopyes)
@@ -303,41 +315,52 @@ namespace ReserveCopier
                     {
                         try
                         {
-                            if (fi.LastWriteTime < timeToDelete)
+                            if (fi.LastWriteTime <= timeToDelete)
                             {
-                                reserveDeleter(fi);
+                                wasdeleted = reserveDeleter(fi);
                             }
                         }
                         catch (Exception ex)
                         {
-                            logg("286." + ex.Message);
+                            logg("315.reserveDeleter." + ex.Message);
                         }
                     }
                 }
             }
-
+            return wasdeleted;
         }
 
-        private void reserveDeleter(FileInfo fileInfo)
+        private bool reserveDeleter(FileInfo fileInfo)
         {
+            bool wasdeleted = false;
             if (fileInfo.Exists)
             {
                 try
                 {
-                    logg("316. Удаляю файлы из " + fileInfo.DirectoryName);
+                    logg("328.reserveDeleter. Удаляю файлы из " + fileInfo.DirectoryName);
                     DirectoryInfo di = new DirectoryInfo(fileInfo.DirectoryName);
                     DirectoryInfo[] diffdirs = di.GetDirectories("*", SearchOption.TopDirectoryOnly);
                     foreach (DirectoryInfo dir in diffdirs)
                     {
                         try
                         {
-                            DeleteNonEmptyDirs(dir);
-                            DeleteEmptyDirs(dir);
+                            logg("335.reserveDeleter. Удаляю не пустые каталоги и файлы из " + dir.FullName);
+                            wasdeleted = DeleteNonEmptyDirs(dir);
                         }
                         catch (Exception ex)
                         {
-                            logg("277." + ex.Message);
+                            logg("340.reserveDeleter." + ex.Message);
                         }
+                        try
+                        {
+                            logg("344.reserveDeleter. Удаляю файлы из " + dir.FullName);
+                            wasdeleted = DeleteEmptyDirs(dir);
+                        }
+                        catch (Exception ex)
+                        {
+                            logg("349.reserveDeleter." + ex.Message);
+                        }
+
                     }
                     diffdirs = di.GetDirectories("*", SearchOption.TopDirectoryOnly);
                     if (diffdirs.Length == 0) Directory.Delete(fileInfo.DirectoryName, true);
@@ -347,10 +370,12 @@ namespace ReserveCopier
                     logg("286." + ex.Message);
                 }
             }
+            return wasdeleted;
         }
 
-        private void DeleteNonEmptyDirs(DirectoryInfo _dir)
+        private bool DeleteNonEmptyDirs(DirectoryInfo _dir)
         {
+            bool wasdeleted = false;
             _dir.Attributes &= ~FileAttributes.ReadOnly;
             FileInfo[] files = _dir.GetFiles();
             foreach (FileInfo file in files)
@@ -370,11 +395,12 @@ namespace ReserveCopier
                     }
                     file.Attributes &= ~FileAttributes.ReadOnly;
                     File.Delete(file.FullName);
+                    wasdeleted = true;
                     //file.Delete();
                 }
                 catch (Exception ex)
                 {
-                    logg("337." + ex.Message);
+                    logg("388." + ex.Message);
                 }
             }
             DirectoryInfo[] diffdirs = _dir.GetDirectories("*", SearchOption.TopDirectoryOnly);
@@ -382,36 +408,54 @@ namespace ReserveCopier
             {
                 try
                 {
-                    DeleteNonEmptyDirs(dir);
-                    DeleteEmptyDirs(dir);
+                    logg("396. Удаляю не пустые каталоги и файлы из " + dir.FullName);
+                    wasdeleted = DeleteNonEmptyDirs(dir);
                 }
                 catch (Exception ex)
                 {
-                    logg("350." + ex.Message);
+                    logg("400." + ex.Message);
+                }
+
+                try
+                {
+
+                    logg("407. Удаляю пустые каталоги из " + dir.FullName);
+                    wasdeleted = DeleteEmptyDirs(dir);
+                }
+                catch (Exception ex)
+                {
+                    logg("412." + ex.Message);
                 }
             }
+            return wasdeleted;
         }
 
-        private void DeleteEmptyDirs(DirectoryInfo dir)
+        private bool DeleteEmptyDirs(DirectoryInfo dir)
         {
-            DirectoryInfo[] directoryInfo = dir.GetDirectories();
-            FileInfo[] fileInfos = dir.GetFiles();
-            if (fileInfos.Length == 0)
+            bool wasdeleted = false;
+            if (dir.Exists)
             {
-                if (directoryInfo.Length == 0)
+                DirectoryInfo[] directoryInfo = dir.GetDirectories();
+                FileInfo[] fileInfos = dir.GetFiles();
+                if (fileInfos.Length == 0)
                 {
-                    dir.Attributes &= ~FileAttributes.ReadOnly;
-                    dir.Delete();
-                }
-                else
-                {
-                    foreach (DirectoryInfo _dir in directoryInfo)
+                    if (directoryInfo.Length == 0)
                     {
-                        DeleteEmptyDirs(_dir);
+                        dir.Attributes &= ~FileAttributes.ReadOnly;
+                        dir.Delete();
+                        wasdeleted = true;
+                    }
+                    else
+                    {
+                        foreach (DirectoryInfo _dir in directoryInfo)
+                        {
+                            DeleteEmptyDirs(_dir);
+                        }
                     }
                 }
+                else return true;
             }
-            else return;
+            return wasdeleted;
         }
 
         /// <summary>
@@ -458,6 +502,21 @@ namespace ReserveCopier
             deletePeriodic = (int)Properties.Settings.Default.DelPeriodNum;
             deletePeriod = Properties.Settings.Default.DelPeriodStr;
             MinimizeInTray = Properties.Settings.Default.MinimizeInTray;
+            double multiplier = 1;
+            string sizeType = Properties.Settings.Default.ClearForFreeSpaceSize;
+            switch (sizeType)
+            {
+                case "Kb":
+                    multiplier = Math.Pow(1024, 1); break;
+                case "Mb":
+                    multiplier = Math.Pow(1024, 2); break;
+                case "Gb":
+                    multiplier = Math.Pow(1024, 3); break;
+                case "Tb":
+                    multiplier = Math.Pow(1024, 4); break;
+            }
+            delMinSize = (ulong)((double)Properties.Settings.Default.ClearForFreeSpaceValue * multiplier);
+            delForFreeSpace = Properties.Settings.Default.ClearForFreeSpaceCheck;
             inDeleting = false;
         }
 
@@ -514,7 +573,6 @@ namespace ReserveCopier
         {
             DirectoryInfo dirinfo = new DirectoryInfo(new DirectoryInfo(extpath).GetSymbolicLinkTarget());
             string path = dirinfo.FullName;
-
             if (File.Exists(path))
             {
                 if (path.Length < 32567)
@@ -550,20 +608,14 @@ namespace ReserveCopier
                         }
                         catch (Exception ex)
                         {
-                            //progressList.Add(DateTime.Now.ToLongTimeString() + " . Ошибка : " + ex.Message);
-                            //dtLog.Rows.Add(DateTime.Now, "134.Ошибка : " + ex.Message);
                             logg("265.Ошибка : " + ex.Message);
                             logg(path);
-                            //InterfaceUpdateTimer_Tick();
                         }
                     }
                     catch (Exception ex)
                     {
-                        //progressList.Add(DateTime.Now.ToLongTimeString() + " . Ошибка : " + ex.Message);
-                        //dtLog.Rows.Add(DateTime.Now, "141.Ошибка : " + ex.Message);
                         logg("273.Ошибка : " + ex.Message);
                         logg(path);
-                        //InterfaceUpdateTimer_Tick();
                     }
                 }
             }
@@ -706,9 +758,9 @@ namespace ReserveCopier
                         dtLog.Rows[0].Delete();
                     }
                 }*/
-                if (blistlog.Count > 200)
+                if (blistlog.Count > 2000)
                 {
-                    int rws2del = (blistlog.Count - 200);
+                    int rws2del = (blistlog.Count - 2000);
                     for (int i = 0; i < rws2del; i++)
                     {
                         blistlog.RemoveAt(0);
@@ -781,7 +833,7 @@ namespace ReserveCopier
         private void CheckPaths()
         {
             //dtLog.Rows.Add(DateTime.Now, "229.Перепроверю пути сохранения файлов");
-            logg("484.Перепроверю пути сохранения файлов");
+            logg("813.CheckPaths.Перепроверю пути сохранения файлов");
             //InterfaceUpdateTimer_Tick();
             DateTime dt1 = DateTime.Now;
             string CreateDiffDay = dt1.Year + "\\" + dt1.Month + "\\" + dt1.Day + "\\" + dt1.Hour + "." + dt1.Minute;
@@ -1290,7 +1342,6 @@ namespace ReserveCopier
             }
         }
 
-
         private void autostart_chkbx_CheckedChanged(object sender, EventArgs e)
         {
             //autostart = false;
@@ -1305,15 +1356,50 @@ namespace ReserveCopier
             Properties.Settings.Default.Reload();
         }
 
-
-        private void updateReserves()
+        private void updateReserves(DateTime? timeTodelete = null)
         {
+            logg("1360.MainForm.updateReserves. Загрузка потока.");
             Thread trd = new Thread(() =>
             uniinvoker.TryInvoke(reserv_dgv, () =>
             {
+                logg("1364.MainForm.updateReserves. Запущен " + Thread.CurrentThread.ManagedThreadId + " поток.");
+                DriveInfo driveInfo = new DriveInfo(MainFilePath.Split(':')[0]);
+                ulong freeSpace = (ulong)driveInfo.AvailableFreeSpace;
                 reserveCopyes.Clear();
                 DirectoryInfo scanPath = new DirectoryInfo(Properties.Settings.Default.OutputPath);
-                GetReserveCopyes(new string []{ "DIFFILE.txt","MAINFULL.txt"}, scanPath);
+                GetReserveCopyes(new string[] { "DIFFILE.txt", "MAINFULL.txt" }, scanPath);
+                if (timeTodelete != null) reserveDeleter((DateTime)timeTodelete);
+                logg("1348.MainForm.updateReserves.Доступно всего: " + freeSpace + ". Минимальный размер свободного места: " + delMinSize);
+                int attempts = 0;
+                ulong prevfreespace = 0;
+                while ((freeSpace < delMinSize) && (delForFreeSpace) && attempts < 1000)
+                {
+                    if (delForFreeSpace)
+                    {
+                        if (reserveDeleter(oldestReserve))
+                        {
+                            logg("1377.MainForm." + "Доступно всего: " + freeSpace + ". Удаляю файлы для освобождения места по дате: " + oldestReserve.ToShortDateString() + " " + oldestReserve.ToShortTimeString());
+                        }
+                    }
+                    reserveCopyes.Clear();
+                    GetReserveCopyes(new string[] { "DIFFILE.txt", "MAINFULL.txt" }, scanPath);
+                    freeSpace = (ulong)driveInfo.AvailableFreeSpace;
+                    if (prevfreespace == freeSpace)
+                    {
+                        attempts++;
+                        if (attempts % 100 == 0)
+                        {
+                            logg("1389.MainForm.updateReserves. Попыток очистки:" + attempts);
+                        }
+                    }
+
+                    else
+                    {
+                        prevfreespace = freeSpace;
+                        attempts = 0;
+                    }
+                }
+                logg("1401.MainForm.updateReserves. Поток " + Thread.CurrentThread.ManagedThreadId + " завершён.");
             }));
             trd.Start();
         }

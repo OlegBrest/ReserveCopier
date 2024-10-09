@@ -12,7 +12,7 @@ namespace ReserveCopier.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.9.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.11.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -224,6 +224,42 @@ namespace ReserveCopier.Properties {
             }
             set {
                 this["MinimizeInTray"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ClearForFreeSpaceCheck {
+            get {
+                return ((bool)(this["ClearForFreeSpaceCheck"]));
+            }
+            set {
+                this["ClearForFreeSpaceCheck"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("400")]
+        public decimal ClearForFreeSpaceValue {
+            get {
+                return ((decimal)(this["ClearForFreeSpaceValue"]));
+            }
+            set {
+                this["ClearForFreeSpaceValue"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ClearForFreeSpaceSize {
+            get {
+                return ((string)(this["ClearForFreeSpaceSize"]));
+            }
+            set {
+                this["ClearForFreeSpaceSize"] = value;
             }
         }
     }
