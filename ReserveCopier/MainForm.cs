@@ -247,9 +247,9 @@ namespace ReserveCopier
             DeleteEmptyDirs(scanPath);
         }
 
-        private void GetReserveCopyes(string[] KeyFilesName, DirectoryInfo startDir)
+        private void GetReserveCopyes(string[] KeyFilesName, DirectoryInfo startDir, bool restOldest)
         {
-            oldestReserve = DateTime.MaxValue;
+            if (restOldest) oldestReserve = DateTime.Now;
             if (!startDir.Exists) Directory.CreateDirectory(startDir.FullName);
             List<FileInfo> files = new List<FileInfo>();
             foreach (string name in KeyFilesName)
@@ -297,7 +297,7 @@ namespace ReserveCopier
                     }
                     else
                     {
-                        GetReserveCopyes(KeyFilesName, dir);
+                        GetReserveCopyes(KeyFilesName, dir,false);
                     }
                 }
             }
@@ -1367,7 +1367,7 @@ namespace ReserveCopier
                 ulong freeSpace = (ulong)driveInfo.AvailableFreeSpace;
                 reserveCopyes.Clear();
                 DirectoryInfo scanPath = new DirectoryInfo(Properties.Settings.Default.OutputPath);
-                GetReserveCopyes(new string[] { "DIFFILE.txt", "MAINFULL.txt" }, scanPath);
+                GetReserveCopyes(new string[] { "DIFFILE.txt", "MAINFULL.txt" }, scanPath,true);
                 if (timeTodelete != null) reserveDeleter((DateTime)timeTodelete);
                 logg("1348.MainForm.updateReserves.Доступно всего: " + freeSpace + ". Минимальный размер свободного места: " + delMinSize);
                 int attempts = 0;
@@ -1382,7 +1382,7 @@ namespace ReserveCopier
                         }
                     }
                     reserveCopyes.Clear();
-                    GetReserveCopyes(new string[] { "DIFFILE.txt", "MAINFULL.txt" }, scanPath);
+                    GetReserveCopyes(new string[] { "DIFFILE.txt", "MAINFULL.txt" }, scanPath, true);
                     freeSpace = (ulong)driveInfo.AvailableFreeSpace;
                     if (prevfreespace == freeSpace)
                     {
