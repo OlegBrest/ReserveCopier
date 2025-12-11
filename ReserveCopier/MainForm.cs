@@ -920,8 +920,16 @@ namespace ReserveCopier
                     //dtLog.Rows.Add(DateTime.Now, "518.Записываю файл отличий.");
                     logg("570.Записываю файл индексов отличий.");
                     //InterfaceUpdateTimer_Tick();
-                    if (!Directory.Exists(DiffFilePath)) Directory.CreateDirectory(DiffFilePath);
-                    File.WriteAllLines(DiffFileName, difflines);
+                    if (difflines.Count() > 0)
+                    {
+                        if (!Directory.Exists(DiffFilePath)) Directory.CreateDirectory(DiffFilePath);
+                        File.WriteAllLines(DiffFileName, difflines);
+                        Properties.Settings.Default.LastDiffPath = DiffFilePath;
+                    }
+                    else
+                    {
+                        logg("931.Различий не найдено! Файл разностей записан не будет!");
+                    }
                     if (mode == 2)
                     {
                         // и перезапишем основной файл
@@ -933,7 +941,6 @@ namespace ReserveCopier
                         // InterfaceUpdateTimer_Tick();
                         File.WriteAllLines(MainFileName, currlines);
                     }
-                    Properties.Settings.Default.LastDiffPath = DiffFilePath;
                     Properties.Settings.Default.LastDiffTime = DateTime.Now;
                     Properties.Settings.Default.Save();
                     Properties.Settings.Default.Reload();
