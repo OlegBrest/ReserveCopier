@@ -24,6 +24,8 @@ namespace ReserveCopier
         double TotalSize = 0;
         int log_rows = 0;
         static int currThreads = 0; // количество потоков для многопоточки
+        int workMode = 0; // 0 - полное,1 - разностное по основному, 2 - разностное по последнему, 3 - обычное
+        bool workReplaceOldFiles = false;
 
         public struct LogStr
         {
@@ -165,7 +167,6 @@ namespace ReserveCopier
             int HourAdd = (int)Properties.Settings.Default.periodicHours;
             int MinutsAdd = (int)Properties.Settings.Default.PeriodicMinutes;
             DateTime nextdiffevent = Properties.Settings.Default.LastDiffTime.AddHours(HourAdd).AddMinutes(MinutsAdd);
-            string CopyType = Properties.Settings.Default.CopyModeValue;
             string FullWriteMode = Properties.Settings.Default.FullCopyPeriodic;
             DateTime nextfullevent = Properties.Settings.Default.LastFullTime;
             switch (FullWriteMode)
@@ -192,7 +193,7 @@ namespace ReserveCopier
                     // проверим день недели
                     if (dayofweek.Contains(dateNow.DayOfWeek.ToString()))
                     {
-                        if (CopyType.Equals("Полное"))
+                        if (workMode==0 || workMode==3)
                         {
                             if (dateNow > nextfullevent)
                             {
@@ -297,7 +298,7 @@ namespace ReserveCopier
                     }
                     else
                     {
-                        GetReserveCopyes(KeyFilesName, dir,false);
+                        GetReserveCopyes(KeyFilesName, dir, false);
                     }
                 }
             }
@@ -502,6 +503,24 @@ namespace ReserveCopier
             deletePeriodic = (int)Properties.Settings.Default.DelPeriodNum;
             deletePeriod = Properties.Settings.Default.DelPeriodStr;
             MinimizeInTray = Properties.Settings.Default.MinimizeInTray;
+            workReplaceOldFiles = Properties.Settings.Default.ReplaceOldFiles;
+            string Mode = Properties.Settings.Default.CopyModeValue;
+            switch (Mode)
+            {
+                case "Полное":
+                    workMode = 0;
+                    break;
+                case "Разностное относительно первой копии":
+                    workMode = 1;
+                    break;
+                case "Разностное относительно последней копии":
+                    workMode = 2;
+                    break;
+                case "Обычное без разделения по датам":
+                    workMode = 3;
+                    break;
+            }
+
             double multiplier = 1;
             string sizeType = Properties.Settings.Default.ClearForFreeSpaceSize;
             switch (sizeType)
@@ -668,32 +687,19 @@ namespace ReserveCopier
             //if (!trdfilecalc.IsAlive && !trdfilecopy.IsAlive && (manualStart || autostart) && !copying)
             if (!trdfilecalc.IsAlive && !trdfilecopy.IsAlive && (step != 0) && (currstep != 0))
             {
-                string Mode = Properties.Settings.Default.CopyModeValue;
-                int modeint = 0;
-                switch (Mode)
-                {
-                    case "Полное":
-                        modeint = 0;
-                        break;
-                    case "Разностное относительно первой копии":
-                        modeint = 1;
-                        break;
-                    case "Разностное относительно последней копии":
-                        modeint = 2;
-                        break;
-                }
+               
                 /* if (calctrdstarted)
                  {
                      manualStart = false;
                      autostart = false;
                      calctrdstarted = false;*/
-                if ((step == 1) && (currstep == 1)) WriteIndexFiles(modeint);
+                if ((step == 1) && (currstep == 1)) WriteIndexFiles(workMode);
                 if ((step == 2) && (currstep == 2))
                 {
                     currstep = 3;
                     logg("639.currstep = 3");
                     trdfilecopy = new Thread(CopyFiles);
-                    trdfilecopy.Start(modeint);
+                    trdfilecopy.Start(workMode);
                 }
                 //}
             }
@@ -856,9 +862,9 @@ namespace ReserveCopier
                     CreateFullPriodicName = dt1.Year.ToString();
                     break;
             }
-            string Mode = Properties.Settings.Default.CopyModeValue;
-            if (Mode.Equals("Полное")) CreateFullPriodicName = dt1.Year + "\\" + dt1.Month + "\\" + dt1.Day + "\\" + dt1.Hour;
+            if (workMode == 0) CreateFullPriodicName = dt1.Year + "\\" + dt1.Month + "\\" + dt1.Day + "\\" + dt1.Hour;
             MainFilePath = Properties.Settings.Default.OutputPath + "\\" + CreateFullPriodicName + "\\";
+            if (workMode == 3) MainFilePath = Properties.Settings.Default.OutputPath + "\\";
             MainFileName = MainFilePath + "MAINFULL.txt";
             DiffFilePath = Properties.Settings.Default.OutputPath + "\\" + CreateDiffDay + "\\";
             DiffFileName = DiffFilePath + "DIFFILE.txt";
@@ -876,10 +882,12 @@ namespace ReserveCopier
             currstep = 2;
             logg("822.currstep = 2");
             string[] currlines = new string[currFileData.Count];
-            if (File.Exists(MainFileName))
+            currFileData.ToStringArray(ref currlines);
+            if (!Directory.Exists(MainFilePath)) Directory.CreateDirectory(MainFilePath);
+            if (File.Exists(MainFileName) || workMode == 3)
             {
                 // создаём полный файл полного копирования
-                if (mode == 0)
+                if (mode == 0 || mode == 3)
                 {
                     //dtLog.Rows.Add(DateTime.Now, "337.Записываю основной файл поверх старого." + currlines.Length + " записей.");
                     logg("534.Записываю основной файл поверх старого." + currlines.Length + " записей.");
@@ -888,7 +896,7 @@ namespace ReserveCopier
                     File.WriteAllLines(MainFileName, currlines);
                 }
                 // если нет полного файла то создаём , если есть то создаём новый разностный DIFFILE не изменяя MAINFULL
-                else if (mode != 0)
+                else if (mode != 0 && mode!=3)
                 {
                     #region заливаем предыдущий ДТ для сравнения
                     //dtLog.Rows.Add(DateTime.Now, "499.Читаю основной файл для последующего сравнения.");
@@ -949,11 +957,9 @@ namespace ReserveCopier
             }
             else
             {
-                currFileData.ToStringArray(ref currlines);
                 //dtLog.Rows.Add(DateTime.Now, "499.Записываю основной файл.");
                 logg("595.Записываю основной файл индексов.");
                 //InterfaceUpdateTimer_Tick();
-                if (!Directory.Exists(MainFilePath)) Directory.CreateDirectory(MainFilePath);
                 File.WriteAllLines(MainFileName, currlines);
                 Properties.Settings.Default.LastFullTime = DateTime.MinValue;
                 Properties.Settings.Default.Save();
@@ -970,7 +976,7 @@ namespace ReserveCopier
             //copying = true;
             int modeint = (int)mode;
             // делаем полную копию
-            if (modeint == 0)
+            if (modeint == 0 || modeint == 3)
             {
                 if (File.Exists(MainFileName))
                 {
@@ -978,7 +984,7 @@ namespace ReserveCopier
                     mainFiledata.InsertFromStrArr(File.ReadAllLines(MainFileName));
                     TotalSize = mainFiledata.GetTotalSize();
 
-                    CopyFromDataFileToDisk(mainFiledata, true, modeint);
+                    CopyFromDataFileToDisk(mainFiledata, true, modeint,workReplaceOldFiles);
 
                     Properties.Settings.Default.LastFullTime = DateTime.Now;
                     Properties.Settings.Default.Save();
@@ -992,7 +998,7 @@ namespace ReserveCopier
                 }
             }
             // делаем разностную 
-            if (modeint != 0)
+            if (modeint != 0 && modeint != 3)
             {
                 DateTime lastfulldateTime = Properties.Settings.Default.LastFullTime;
                 bool need2fulldate = false;
@@ -1019,7 +1025,7 @@ namespace ReserveCopier
                     mainFiledata.InsertFromStrArr(File.ReadAllLines(MainFileName));
                     TotalSize = mainFiledata.GetTotalSize();
                     DateTime startCopyTime = DateTime.Now;
-                    CopyFromDataFileToDisk(mainFiledata, true, modeint);
+                    CopyFromDataFileToDisk(mainFiledata, true, modeint, workReplaceOldFiles);
                     TimeSpan CopyTime = (DateTime.Now - startCopyTime);
                     //dtLog.Rows.Add(DateTime.Now, "595.Скопированы основные файлы." + mainFiledata.Count + " файлов");
                     logg("757.Скопированы основные файлы." + mainFiledata.Count + " файлов за " + CopyTime.TotalSeconds + " сек.");
@@ -1149,7 +1155,7 @@ namespace ReserveCopier
                     updateReserves();
                     //InterfaceUpdateTimer_Tick();
                 }
-                else
+                else if (workMode!=3)
                 {
                     //dtLog.Rows.Add(DateTime.Now, "783.Ошибка. Не найден файл разности для режима №2.");
                     //dtLog.Rows.Add(DateTime.Now, DiffFileName);
@@ -1164,7 +1170,7 @@ namespace ReserveCopier
             logg("1102.currstep = 0;step = 0");
         }
 
-        private void CopyFromDataFileToDisk(FileData df, bool isMain = true, int modeint = 1)
+        private void CopyFromDataFileToDisk(FileData df, bool isMain = true, int modeint = 1, bool replaceOldFile = false)
         {
             DateTime starttime = DateTime.Now;
             TotalFiles = df.Files.Count;
@@ -1184,7 +1190,7 @@ namespace ReserveCopier
                 {
                     //while (currThreads > maxThreads) Thread.Sleep(10);
                     currThreads++;
-                    CopyFile(fs, isMain, modeint);
+                    CopyFile(fs, isMain, modeint, workReplaceOldFiles);
                     TimeSpan ts = (DateTime.Now - starttime);
                     if (ts.TotalSeconds > 2)
                     {
@@ -1210,7 +1216,7 @@ namespace ReserveCopier
                 {
                     while (currThreads > maxThreads) Thread.Sleep(10);
                     currThreads++;
-                    CopyFile(fs, isMain, modeint);
+                    CopyFile(fs, isMain, modeint, workReplaceOldFiles);
 
                     TimeSpan ts = (DateTime.Now - starttime);
                     if (ts.TotalSeconds > 2)
@@ -1239,7 +1245,7 @@ namespace ReserveCopier
             starttime = DateTime.Now;
         }
 
-        private void CopyFile(FileData.FileStruct fs, bool isMain, int modeint)
+        private void CopyFile(FileData.FileStruct fs, bool isMain, int modeint, bool replaceOldFile)
         {
             try
             {
@@ -1255,7 +1261,18 @@ namespace ReserveCopier
                     {
                         if ((fs.FileFullName.Length < 32767) && (savefilename.Length < 32767))
                         {
-                            File.Copy(fs.FileFullName, savefilename, true);
+                            if(File.Exists(savefilename))
+                            {
+                                FileInfo fileInfoSave = new FileInfo(savefilename);
+                                FileInfo fileInfoFrom = new FileInfo(fs.FileFullName);
+                                if (fileInfoSave.LastWriteTime < fileInfoFrom.LastWriteTime)
+                                {
+                                    File.Delete(savefilename);
+                                    File.Copy(fs.FileFullName, savefilename, true);
+                                    logg("1271.Заменён старый файл " + fs.FileFullName);
+                                }
+                            }
+                            else File.Copy(fs.FileFullName, savefilename, true);
                             current_path = fs.FileFullName;
                         }
                         else
@@ -1374,12 +1391,12 @@ namespace ReserveCopier
                 ulong freeSpace = (ulong)driveInfo.AvailableFreeSpace;
                 reserveCopyes.Clear();
                 DirectoryInfo scanPath = new DirectoryInfo(Properties.Settings.Default.OutputPath);
-                GetReserveCopyes(new string[] { "DIFFILE.txt", "MAINFULL.txt" }, scanPath,true);
+                GetReserveCopyes(new string[] { "DIFFILE.txt", "MAINFULL.txt" }, scanPath, true);
                 if (timeTodelete != null) reserveDeleter((DateTime)timeTodelete);
                 logg("1348.MainForm.updateReserves.Доступно всего: " + freeSpace + ". Минимальный размер свободного места: " + delMinSize);
                 int attempts = 0;
                 ulong prevfreespace = 0;
-                while ((freeSpace < delMinSize) && (delForFreeSpace) && attempts < 1000)
+                while ((freeSpace < delMinSize) && (delForFreeSpace) && attempts < 1000 && workMode!=3)
                 {
                     if (delForFreeSpace)
                     {

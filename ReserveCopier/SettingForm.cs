@@ -119,7 +119,18 @@ namespace ReserveCopier
 
         private void Mode_Combobox_TextChanged(object sender, EventArgs e)
         {
-            if (Mode_Combobox.Text.Equals("Полное"))
+            if (Mode_Combobox.Text.Equals("Обычное без разделения по датам"))
+            {
+                lowCapacityCheckBox.Enabled = false;
+                lowCapacityOldNumericUpDown.Enabled = false;
+                lowCapacityPeriodComboBox.Enabled = false;
+                deleteOldCheckBox.Enabled = false;
+                deleteOldNumericUpDown.Enabled = false;
+                DeleteOldPeriodComboBox.Enabled = false;
+                oldFileReplaceCheckBox.Enabled = true;
+                PeriodicPanel.Enabled = false;
+            }
+            else if (Mode_Combobox.Text.Equals("Полное"))
             {
                 //fullcopy_Combobox.Enabled = false;
                 label3.Enabled = false;
@@ -130,6 +141,9 @@ namespace ReserveCopier
                 label6.Enabled = false;
                 minuts_numericUpDown.Enabled = false;
                 label7.Enabled = false;
+                oldFileReplaceCheckBox.Enabled = false;
+                PeriodicPanel.Enabled = true;
+
             }
             else
             {
@@ -142,6 +156,8 @@ namespace ReserveCopier
                 label6.Enabled = true;
                 minuts_numericUpDown.Enabled = true;
                 label7.Enabled = true;
+                oldFileReplaceCheckBox.Enabled = false;
+                PeriodicPanel.Enabled = true;
             }
         }
     }

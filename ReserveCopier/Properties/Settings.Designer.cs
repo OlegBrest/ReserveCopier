@@ -262,5 +262,17 @@ namespace ReserveCopier.Properties {
                 this["ClearForFreeSpaceSize"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ReplaceOldFiles {
+            get {
+                return ((bool)(this["ReplaceOldFiles"]));
+            }
+            set {
+                this["ReplaceOldFiles"] = value;
+            }
+        }
     }
 }
