@@ -450,9 +450,23 @@ namespace ReserveCopier
                 {
                     if (directoryInfo.Length == 0)
                     {
-                        dir.Attributes &= ~FileAttributes.ReadOnly;
-                        dir.Delete();
-                        wasdeleted = true;
+                        try
+                        {
+                            dir.Attributes &= ~FileAttributes.ReadOnly;
+                        }
+                        catch (Exception ex) 
+                        {
+                            logg("Error", "459.DeleteEmptyDirs. : " + ex.Message + " " + dir.FullName);
+                        }
+                        try
+                        {
+                            dir.Delete();
+                            wasdeleted = true;
+                        }
+                        catch (Exception ex)
+                        {
+                            logg("Error", "468.DeleteEmptyDirs. : " + ex.Message + " " + dir.FullName);
+                        }
                     }
                     else
                     {
