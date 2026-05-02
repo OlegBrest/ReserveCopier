@@ -51,13 +51,16 @@ namespace ReserveCopier
 
         private void EditPathBttn_Click(object sender, EventArgs e)
         {
-            string defaultPath = InputPathLstBX.Items[InputPathLstBX.Items.IndexOf(InputPathLstBX.CheckedItems[0])].ToString();
-            folderBrowserDialog.RootFolder = Environment.SpecialFolder.Desktop;
-            folderBrowserDialog.SelectedPath = defaultPath;
-            DialogResult dr = folderBrowserDialog.ShowDialog();
-            if (dr == DialogResult.OK)
+            if (InputPathLstBX.CheckedItems.Count > 0)
             {
-                InputPathLstBX.Items[InputPathLstBX.Items.IndexOf(InputPathLstBX.CheckedItems[0])] = folderBrowserDialog.SelectedPath;
+                string defaultPath = InputPathLstBX.Items[InputPathLstBX.Items.IndexOf(InputPathLstBX.CheckedItems[0])].ToString();
+                folderBrowserDialog.RootFolder = Environment.SpecialFolder.Desktop;
+                folderBrowserDialog.SelectedPath = defaultPath;
+                DialogResult dr = folderBrowserDialog.ShowDialog();
+                if (dr == DialogResult.OK)
+                {
+                    InputPathLstBX.Items[InputPathLstBX.Items.IndexOf(InputPathLstBX.CheckedItems[0])] = folderBrowserDialog.SelectedPath;
+                }
             }
         }
 

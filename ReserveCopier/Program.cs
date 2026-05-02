@@ -22,7 +22,7 @@ namespace ReserveCopier
                 if (!mutex.WaitOne(0, false))
                 {
                     MessageBox.Show("Экземпляр уже запущен.");
-                    return;
+                   // return;
                 }
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);

@@ -590,51 +590,62 @@ namespace ReserveCopier
         /// <param name="extpath"></param>
         private void checkForDirFile(string extpath)
         {
-            DirectoryInfo dirinfo = new DirectoryInfo(new DirectoryInfo(extpath).GetSymbolicLinkTarget());
-            string path = dirinfo.FullName;
-            if (File.Exists(path))
+            DirectoryInfo dirinfo = null;
+            try
             {
-                if (path.Length < 32567)
+                dirinfo = new DirectoryInfo(new DirectoryInfo(extpath).GetSymbolicLinkTarget());
+            }
+            catch (Exception e) 
+            {
+                logg("600.Mainform.checkForDirFile. Ошибка:" + e.Message + Environment.NewLine + extpath);
+            }
+            if (dirinfo != null)
+            {
+                string path = dirinfo.FullName;
+                if (File.Exists(path))
                 {
-                    current_path = path;
-                    TotalFiles++;
-                    FileInfo fi = new FileInfo(path);
-                    long length = fi.Length;
-                    long chgtime = fi.LastWriteTime.Ticks;
-                    TotalSize += length;
-                    currFileData.AddRow("FILE", path, length, chgtime);
+                    if (path.Length < 32567)
+                    {
+                        current_path = path;
+                        TotalFiles++;
+                        FileInfo fi = new FileInfo(path);
+                        long length = fi.Length;
+                        long chgtime = fi.LastWriteTime.Ticks;
+                        TotalSize += length;
+                        currFileData.AddRow("FILE", path, length, chgtime);
+                    }
+                    else
+                    {
+                        logg("271.Ошибка : Слишком длинный путь " + path);
+                    }
                 }
                 else
                 {
-                    logg("271.Ошибка : Слишком длинный путь " + path);
-                }
-            }
-            else
-            {
-                if (!dirsList.Contains(path) && Directory.Exists(path))
-                {
-                    dirsList.Add(path);
-                    TotalDirs++;
-                    try
+                    if (!dirsList.Contains(path) && Directory.Exists(path))
                     {
-                        string[] dirs = Directory.GetDirectories(path, "*", SearchOption.TopDirectoryOnly);
-                        CalcTotalFileDirsCount(dirs);
+                        dirsList.Add(path);
+                        TotalDirs++;
                         try
                         {
-                            string[] files = Directory.GetFiles(path);
-                            if (files.Count() == 0) currFileData.AddRow("DIR", path, 0, 0);
-                            CalcTotalFileDirsCount(files);
+                            string[] dirs = Directory.GetDirectories(path, "*", SearchOption.TopDirectoryOnly);
+                            CalcTotalFileDirsCount(dirs);
+                            try
+                            {
+                                string[] files = Directory.GetFiles(path);
+                                if (files.Count() == 0) currFileData.AddRow("DIR", path, 0, 0);
+                                CalcTotalFileDirsCount(files);
+                            }
+                            catch (Exception ex)
+                            {
+                                logg("265.Ошибка : " + ex.Message);
+                                logg(path);
+                            }
                         }
                         catch (Exception ex)
                         {
-                            logg("265.Ошибка : " + ex.Message);
+                            logg("273.Ошибка : " + ex.Message);
                             logg(path);
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        logg("273.Ошибка : " + ex.Message);
-                        logg(path);
                     }
                 }
             }
