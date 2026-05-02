@@ -53,13 +53,13 @@
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.reserv_dgv = new System.Windows.Forms.DataGridView();
+            this.ReserveContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.OpenPathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.DeleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.NotifyContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.MaximizeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ExitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.ReserveContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.OpenPathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.DeleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewprogress)).BeginInit();
             this.main_toolstrip_panel.SuspendLayout();
@@ -68,8 +68,8 @@
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.reserv_dgv)).BeginInit();
-            this.NotifyContextMenuStrip.SuspendLayout();
             this.ReserveContextMenuStrip.SuspendLayout();
+            this.NotifyContextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // MainPanel
@@ -338,7 +338,7 @@
             this.tabPage2.Text = "Обзор резервных копий";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // test_dgv
+            // reserv_dgv
             // 
             this.reserv_dgv.AllowUserToAddRows = false;
             this.reserv_dgv.AllowUserToDeleteRows = false;
@@ -350,11 +350,33 @@
             this.reserv_dgv.ContextMenuStrip = this.ReserveContextMenuStrip;
             this.reserv_dgv.Location = new System.Drawing.Point(3, 3);
             this.reserv_dgv.MultiSelect = false;
-            this.reserv_dgv.Name = "test_dgv";
+            this.reserv_dgv.Name = "reserv_dgv";
             this.reserv_dgv.ReadOnly = true;
             this.reserv_dgv.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.reserv_dgv.Size = new System.Drawing.Size(1002, 493);
             this.reserv_dgv.TabIndex = 0;
+            // 
+            // ReserveContextMenuStrip
+            // 
+            this.ReserveContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.OpenPathToolStripMenuItem,
+            this.DeleteToolStripMenuItem});
+            this.ReserveContextMenuStrip.Name = "ReserveContextMenuStrip";
+            this.ReserveContextMenuStrip.Size = new System.Drawing.Size(213, 48);
+            // 
+            // OpenPathToolStripMenuItem
+            // 
+            this.OpenPathToolStripMenuItem.Name = "OpenPathToolStripMenuItem";
+            this.OpenPathToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
+            this.OpenPathToolStripMenuItem.Text = "Открыть место хранения";
+            this.OpenPathToolStripMenuItem.Click += new System.EventHandler(this.OpenPathToolStripMenuItem_Click);
+            // 
+            // DeleteToolStripMenuItem
+            // 
+            this.DeleteToolStripMenuItem.Name = "DeleteToolStripMenuItem";
+            this.DeleteToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
+            this.DeleteToolStripMenuItem.Text = "Удалить";
+            this.DeleteToolStripMenuItem.Click += new System.EventHandler(this.DeleteToolStripMenuItem_Click);
             // 
             // notifyIcon
             // 
@@ -387,28 +409,6 @@
             this.ExitToolStripMenuItem.Text = "Выйти из программы";
             this.ExitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
             // 
-            // ReserveContextMenuStrip
-            // 
-            this.ReserveContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.OpenPathToolStripMenuItem,
-            this.DeleteToolStripMenuItem});
-            this.ReserveContextMenuStrip.Name = "ReserveContextMenuStrip";
-            this.ReserveContextMenuStrip.Size = new System.Drawing.Size(213, 48);
-            // 
-            // OpenPathToolStripMenuItem
-            // 
-            this.OpenPathToolStripMenuItem.Name = "OpenPathToolStripMenuItem";
-            this.OpenPathToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
-            this.OpenPathToolStripMenuItem.Text = "Открыть место хранения";
-            this.OpenPathToolStripMenuItem.Click += new System.EventHandler(this.OpenPathToolStripMenuItem_Click);
-            // 
-            // DeleteToolStripMenuItem
-            // 
-            this.DeleteToolStripMenuItem.Name = "DeleteToolStripMenuItem";
-            this.DeleteToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
-            this.DeleteToolStripMenuItem.Text = "Удалить";
-            this.DeleteToolStripMenuItem.Click += new System.EventHandler(this.DeleteToolStripMenuItem_Click);
-            // 
             // MainReservCopyer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -433,8 +433,8 @@
             this.tabPage1.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.reserv_dgv)).EndInit();
-            this.NotifyContextMenuStrip.ResumeLayout(false);
             this.ReserveContextMenuStrip.ResumeLayout(false);
+            this.NotifyContextMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }

@@ -108,7 +108,7 @@ namespace ReserveCopier
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(ex.Message);
+                        MessageBox.Show(ex.Message,"111.FileData");
                     }
                 }
                 _isBusy = false;
@@ -192,7 +192,7 @@ namespace ReserveCopier
                                 }
                                 catch (Exception ex)
                                 {
-                                    MessageBox.Show(ex.Message);
+                                    MessageBox.Show(ex.Message,"195.FileData");
                                 }
                             }
                             if (finder > -1)
@@ -208,7 +208,7 @@ namespace ReserveCopier
                         catch (Exception ex)
                         {
                             result = false;
-                            MessageBox.Show(ex.Message);
+                            MessageBox.Show(ex.Message, "211.FileData");
                         }
                     }//);
                 }
