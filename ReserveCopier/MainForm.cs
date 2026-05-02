@@ -344,11 +344,12 @@ namespace ReserveCopier
                     logg("Info", "328.reserveDeleter. Удаляю файлы из " + fileInfo.DirectoryName);
                     DirectoryInfo di = new DirectoryInfo(fileInfo.DirectoryName);
                     DirectoryInfo[] diffdirs = di.GetDirectories("*", SearchOption.TopDirectoryOnly);
+                    if (diffdirs.Length > 10) logg("Info", "347. Удаляю " + diffdirs.Count().ToString() + " каталогов в " + di.FullName);
                     foreach (DirectoryInfo dir in diffdirs)
                     {
                         try
                         {
-                            logg("Info", "335.reserveDeleter. Удаляю не пустые каталоги и файлы из " + dir.FullName);
+                            //logg("Info", "335.reserveDeleter. Удаляю не пустые каталоги и файлы из " + dir.FullName);
                             wasdeleted = DeleteNonEmptyDirs(dir);
                         }
                         catch (Exception ex)
@@ -357,7 +358,7 @@ namespace ReserveCopier
                         }
                         try
                         {
-                            logg("Info", "344.reserveDeleter. Удаляю файлы из " + dir.FullName);
+                            //logg("Info", "344.reserveDeleter. Удаляю файлы из " + dir.FullName);
                             wasdeleted = DeleteEmptyDirs(dir);
                         }
                         catch (Exception ex)
@@ -366,6 +367,7 @@ namespace ReserveCopier
                         }
 
                     }
+                    if (diffdirs.Length > 10) logg("Info", "370. Удаляю " + diffdirs.Count().ToString() + " каталогов в " + di.FullName);
                     diffdirs = di.GetDirectories("*", SearchOption.TopDirectoryOnly);
                     if (diffdirs.Length == 0) Directory.Delete(fileInfo.DirectoryName, true);
                 }
@@ -408,11 +410,13 @@ namespace ReserveCopier
                 }
             }
             DirectoryInfo[] diffdirs = _dir.GetDirectories("*", SearchOption.TopDirectoryOnly);
+            if (diffdirs.Length>10) logg("Info","411. Удаляю " + diffdirs.Count().ToString() + " каталогов в " + _dir.FullName);
             foreach (DirectoryInfo dir in diffdirs)
             {
+                current_path = dir.FullName;
                 try
                 {
-                    logg("Info","396. Удаляю не пустые каталоги и файлы из " + dir.FullName);
+                    //logg("Info","396. Удаляю не пустые каталоги и файлы из " + dir.FullName);
                     wasdeleted = DeleteNonEmptyDirs(dir);
                 }
                 catch (Exception ex)
@@ -423,7 +427,7 @@ namespace ReserveCopier
                 try
                 {
 
-                    logg("Info", "407. Удаляю пустые каталоги из " + dir.FullName);
+                    //logg("Info", "407. Удаляю пустые каталоги из " + dir.FullName);
                     wasdeleted = DeleteEmptyDirs(dir);
                 }
                 catch (Exception ex)
@@ -431,6 +435,7 @@ namespace ReserveCopier
                     logg("Error", "412.DeleteNonEmptyDirs. : " + ex.Message);
                 }
             }
+            if (diffdirs.Length > 10) logg("Info", "435. Закончено " + diffdirs.Count().ToString() + " каталогов в " + _dir.FullName);
             return wasdeleted;
         }
 
@@ -1424,8 +1429,9 @@ namespace ReserveCopier
         {
             logg("Info", "1360.MainForm.updateReserves. Загрузка потока.");
             Thread trd = new Thread(() =>
-            uniinvoker.TryInvoke(reserv_dgv, () =>
+            //uniinvoker.TryInvoke(reserv_dgv, () =>
             {
+                lock (reserveCopyes);
                 logg("Info", "1364.MainForm.updateReserves. Запущен " + Thread.CurrentThread.ManagedThreadId + " поток.");
                 DriveInfo driveInfo = new DriveInfo(MainFilePath.Split(':')[0]);
                 ulong freeSpace = (ulong)driveInfo.AvailableFreeSpace;
@@ -1436,7 +1442,7 @@ namespace ReserveCopier
                 logg("Info", "1348.MainForm.updateReserves.Доступно всего: " + freeSpace + ". Минимальный размер свободного места: " + delMinSize);
                 int attempts = 0;
                 ulong prevfreespace = 0;
-                while ((freeSpace < delMinSize) && (delForFreeSpace) && attempts < 1000 && workMode!=3)
+                while ((freeSpace < delMinSize) && (delForFreeSpace) && attempts < 1000 && workMode != 3)
                 {
                     if (delForFreeSpace)
                     {
@@ -1464,7 +1470,8 @@ namespace ReserveCopier
                     }
                 }
                 logg("Info", "1466.MainForm.updateReserves. Поток " + Thread.CurrentThread.ManagedThreadId + " завершён.");
-            }));
+                //})
+            });
             trd.Start();
         }
 
