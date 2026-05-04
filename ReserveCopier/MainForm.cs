@@ -280,31 +280,46 @@ namespace ReserveCopier
             }
             else
             {
-                DirectoryInfo[] dirs = startDir.GetDirectories("*", SearchOption.TopDirectoryOnly);
-                foreach (DirectoryInfo dir in dirs)
+
+                DirectoryInfo[] dirs = null;
+                try
                 {
-                    files.Clear();
-                    foreach (string name in KeyFilesName)
+                    if (Directory.Exists(startDir.FullName))
                     {
-                        files.AddRange(startDir.GetFiles(name, SearchOption.TopDirectoryOnly));
-                    }
-                    if (files.Count > 0)
-                    {
-                        foreach (FileInfo fi in files)
-                        {
-                            if (fi.Exists)
-                            {
-                                reserveCopyes.Add(fi);
-                                if (fi.LastWriteTime < oldestReserve) oldestReserve = fi.LastWriteTime;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        GetReserveCopyes(KeyFilesName, dir, false);
+                        dirs = startDir.GetDirectories("*", SearchOption.TopDirectoryOnly);
                     }
                 }
-            }
+                catch (Exception ex)
+                {
+                    logg("Error", "291.GetReserveCopyes" + ex.Message);
+                    logg("Error", "291.GetReserveCopyes" + startDir.FullName);
+                }
+                if (dirs != null)
+                {
+                    foreach (DirectoryInfo dir in dirs)
+                    {
+                        files.Clear();
+                        foreach (string name in KeyFilesName)
+                        {
+                            files.AddRange(startDir.GetFiles(name, SearchOption.TopDirectoryOnly));
+                        }
+                        if (files.Count > 0)
+                        {
+                            foreach (FileInfo fi in files)
+                            {
+                                if (fi.Exists)
+                                {
+                                    reserveCopyes.Add(fi);
+                                    if (fi.LastWriteTime < oldestReserve) oldestReserve = fi.LastWriteTime;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            GetReserveCopyes(KeyFilesName, dir, false);
+                        }
+                    }
+                }
             testbs.EndEdit();
         }
 
