@@ -8,6 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Security.Principal;
@@ -27,7 +28,7 @@ namespace ReserveCopier
         int workMode = 0; // 0 - полное,1 - разностное по основному, 2 - разностное по последнему, 3 - обычное
         bool workReplaceOldFiles = false;
         string startButtonText = "Выполнить сейчас";
-
+        bool deletebytimeinwork = false; //индикатор что удаление по времени запущено что бы не было многократных запусков удаления по времени
         public struct LogStr
         {
             public DateTime dtstr { get; set; }
@@ -256,6 +257,7 @@ namespace ReserveCopier
             if (restOldest) oldestReserve = DateTime.Now;
             if (!startDir.Exists) Directory.CreateDirectory(startDir.FullName);
             List<FileInfo> files = new List<FileInfo>();
+            lock (testbs) ;
             foreach (string name in KeyFilesName)
             {
                 files.AddRange(startDir.GetFiles(name, SearchOption.TopDirectoryOnly));
@@ -328,30 +330,39 @@ namespace ReserveCopier
             bool wasdeleted = false;
             if (reserveCopyes.Count > 0)
             {
-                foreach (FileInfo fi in reserveCopyes)
+                try
                 {
-                    if (fi.Exists)
+                    foreach (FileInfo fi in reserveCopyes)
                     {
-                        try
+                        if (fi.Exists)
                         {
-                            if (fi.LastWriteTime <= timeToDelete)
+                            try
                             {
-                                wasdeleted = reserveDeleter(fi);
+                                if (fi.LastWriteTime <= timeToDelete)
+                                {
+                                    wasdeleted = reserveDeleter(fi);
+                                }
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            logg("Error", "315.reserveDeleter. : " + ex.Message);
+                            catch (Exception ex)
+                            {
+                                logg("Error", "315.reserveDeleter. : " + ex.Message);
+                            }
                         }
                     }
                 }
+                catch (Exception ex)
+                {
+                    logg("Error", "353.reserveDeleter. : " + ex.Message);
+                }
             }
+            deletebytimeinwork = false;
             return wasdeleted;
         }
 
         private bool reserveDeleter(FileInfo fileInfo)
         {
             bool wasdeleted = false;
+
             if (fileInfo.Exists)
             {
                 try
@@ -365,7 +376,10 @@ namespace ReserveCopier
                         try
                         {
                             //logg("Info", "335.reserveDeleter. Удаляю не пустые каталоги и файлы из " + dir.FullName);
-                            wasdeleted = DeleteNonEmptyDirs(dir);
+                            if (Directory.Exists(dir.FullName))
+                            {
+                                wasdeleted = DeleteNonEmptyDirs(dir);
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -422,6 +436,7 @@ namespace ReserveCopier
                 catch (Exception ex)
                 {
                     logg("Error", "388.DeleteNonEmptyDirs. : " + ex.Message);
+                    logg("Error", "388.DeleteNonEmptyDirs. : " + file.FullName);
                 }
             }
             DirectoryInfo[] diffdirs = _dir.GetDirectories("*", SearchOption.TopDirectoryOnly);
@@ -437,6 +452,7 @@ namespace ReserveCopier
                 catch (Exception ex)
                 {
                     logg("Error", "400.DeleteNonEmptyDirs. : " + ex.Message);
+                    logg("Error", "400.DeleteNonEmptyDirs. : " + dir.FullName);
                 }
 
                 try
@@ -448,9 +464,10 @@ namespace ReserveCopier
                 catch (Exception ex)
                 {
                     logg("Error", "412.DeleteNonEmptyDirs. : " + ex.Message);
+                    logg("Error", "412.DeleteNonEmptyDirs. : " + dir.FullName);
                 }
             }
-            if (diffdirs.Length > 10) logg("Info", "435. Закончено " + diffdirs.Count().ToString() + " каталогов в " + _dir.FullName);
+            if (diffdirs.Length > 10) logg("Info", "435.Обработано " + diffdirs.Count().ToString() + " каталогов в " + _dir.FullName);
             return wasdeleted;
         }
 
@@ -1467,26 +1484,34 @@ namespace ReserveCopier
                 reserveCopyes.Clear();
                 DirectoryInfo scanPath = new DirectoryInfo(Properties.Settings.Default.OutputPath);
                 GetReserveCopyes(new string[] { "DIFFILE.txt", "MAINFULL.txt" }, scanPath, true);
-                if (timeTodelete != null) reserveDeleter((DateTime)timeTodelete);
+                if (timeTodelete != null && !deletebytimeinwork)
+                {
+                    deletebytimeinwork = true;
+                    reserveDeleter((DateTime)timeTodelete);
+                    deletebytimeinwork = false;
+                }
                 logg("Info", "1348.MainForm.updateReserves.Доступно всего: " + freeSpace + ". Минимальный размер свободного места: " + delMinSize);
                 int attempts = 0;
                 ulong prevfreespace = 0;
-                while ((freeSpace < delMinSize) && (delForFreeSpace) && attempts < 1000 && workMode != 3)
+                while ((freeSpace < delMinSize) && (delForFreeSpace) && attempts < 100 && workMode != 3)
                 {
-                    if (delForFreeSpace)
+                    if (delForFreeSpace && !deletebytimeinwork)
                     {
+                        deletebytimeinwork = true;
                         if (reserveDeleter(oldestReserve))
                         {
+                            freeSpace = (ulong)driveInfo.AvailableFreeSpace;
                             logg("Info", "1377.MainForm." + "Доступно всего: " + freeSpace + ". Удаляю файлы для освобождения места по дате: " + oldestReserve.ToShortDateString() + " " + oldestReserve.ToShortTimeString());
+                            deletebytimeinwork = false;
                         }
                     }
                     reserveCopyes.Clear();
                     GetReserveCopyes(new string[] { "DIFFILE.txt", "MAINFULL.txt" }, scanPath, true);
                     freeSpace = (ulong)driveInfo.AvailableFreeSpace;
-                    if (prevfreespace == freeSpace)
+                    if ((prevfreespace == freeSpace) && !deletebytimeinwork)
                     {
                         attempts++;
-                        if (attempts % 100 == 0)
+                        if (attempts % 10 == 0)
                         {
                             logg("Info", "1389.MainForm.updateReserves. Попыток очистки:" + attempts);
                         }
