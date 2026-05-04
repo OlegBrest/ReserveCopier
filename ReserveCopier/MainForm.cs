@@ -320,9 +320,9 @@ namespace ReserveCopier
                         }
                     }
                 }
-            testbs.EndEdit();
+                testbs.EndEdit();
+            }
         }
-
         private bool reserveDeleter(DateTime timeToDelete)
         {
             bool wasdeleted = false;
