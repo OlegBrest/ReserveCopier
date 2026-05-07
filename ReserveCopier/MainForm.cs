@@ -260,7 +260,15 @@ namespace ReserveCopier
             lock (testbs) ;
             foreach (string name in KeyFilesName)
             {
-                files.AddRange(startDir.GetFiles(name, SearchOption.TopDirectoryOnly));
+                try
+                {
+                    files.AddRange(startDir.GetFiles(name, SearchOption.TopDirectoryOnly));
+                }
+                catch (Exception ex)
+                {
+                    logg("Error","269.GetReserveCopyes" + ex.Message);
+                    if (startDir!=null) logg("Error","269.GetReserveCopyes Path: " + startDir.FullName);
+                }
             }
             if (files.Count > 0)
             {
